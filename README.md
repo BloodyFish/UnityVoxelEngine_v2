@@ -50,14 +50,16 @@ Responsible for:
 - Engine integration  
 - Project management  
 - Script execution  
-- Communication with the native DLL  
+- Communication with the native DLL
+- Chunk **mesh** generation 
 
 ### Native Library (C++)
 
 Responsible for:
 
 - Voxel-related processing implemented outside of Unity  
-- Performance-focused logic compiled into a DLL  
+- Performance-focused logic compiled into a DLL
+- Chunk **noise** generation
 
 Unity scripts interface with the native library to execute voxel processing tasks.
 
