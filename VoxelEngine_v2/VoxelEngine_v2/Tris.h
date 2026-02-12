@@ -1,16 +1,16 @@
 #pragma once
 
+#ifdef TRIS_EXPORTS
+#define TRIS_API __declspec(dllexport)
+#else
 #define TRIS_API __declspec(dllimport)
+#endif
 
 #include <vector>
 
 extern "C" {
-	__declspec(dllexport) TRIS_API int* FrontTris();
-	__declspec(dllexport) TRIS_API int* BackTris();
-	__declspec(dllexport) TRIS_API int* LeftTris();
-	__declspec(dllexport) TRIS_API int* RightTris();
-	__declspec(dllexport) TRIS_API int* TopTris();
-	__declspec(dllexport) TRIS_API int* BottomTris();
+	TRIS_API int* CreateTris(int offset);
 
-	__declspec(dllexport) TRIS_API void DeleteTris(int* ptr);
+	// Free array from memory
+	TRIS_API void DeleteTris(int* ptr);
 }

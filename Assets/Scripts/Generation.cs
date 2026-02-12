@@ -1,63 +1,53 @@
+using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 public class Generation : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    [SerializeField] int seed;
+    [SerializeField] float frequency;
+    [SerializeField] int octaves;
+    [SerializeField] float lacunarity;
+    [SerializeField] float gain;
+
+    public static Dictionary<Vector3, Chunk> chunkDictionary = new Dictionary<Vector3, Chunk>();
+
+    [DllImport("VoxelEngine_v2", EntryPoint = "NoiseInit")]
+    public static extern void NoiseInit(int seed, float frequency, int octaves, float lacunarity, float gain);
+
     void Start()
     {
-        GenerateTestCube();
+        NoiseInit(seed, frequency, octaves, lacunarity, gain);
+
+        for(int x = 0; x < 32; x++)
+        {
+            for(int z = 0; z < 32; z++)
+            {
+                StartCoroutine(GenerateChunk(x, z));            
+            }
+        }
+
+        /*for (int x = 0; x < 32; x++)
+        {
+            for (int z = 0; z < 32; z++)
+            {
+                chunkDictionary.TryGetValue(new Vector3(x * 16, 0, z * 16), out Chunk chunk);
+                chunk.Meshify();
+            }
+        }*/
+
     }
 
-    void GenerateTestCube()
+    IEnumerator GenerateChunk(int x, int z)
     {
-        List<Vector3> vectors = new List<Vector3>();
-        List<int> tris = new List<int>();
+        Chunk chunk = new Chunk(16, 16, 124, new Vector3Int(x * 16, 0, z * 16));
+        chunkDictionary.Add(new Vector3Int(x * 16, 0, z * 16), chunk);
 
-        Vector3[][] allFaces = { Voxel_Verts.GetFrontFace(0, 0, 0), 
-                                 Voxel_Verts.GetBackFace(0, 0, 0), 
-                                 Voxel_Verts.GetLeftFace(0, 0, 0), 
-                                 Voxel_Verts.GetRightFace(0, 0, 0), 
-                                 Voxel_Verts.GetTopFace(0, 0, 0), 
-                                 Voxel_Verts.GetBottomFace(0, 0, 0) };
+        // coroutines are not iterative, they can be executed by Unity in any order. Due to factors outside our control, we should put Generate() last
+        chunk.Generate();
 
-        foreach(Vector3[] v in allFaces)
-        {
-            foreach(Vector3 vector in v)
-            {
-                vectors.Add(vector);
-            }
-        }
-
-        int[][] alltris = { Voxel_Tris.GetFrontTris(0, 0, 0),
-                            Voxel_Tris.GetBackTris(0, 0, 0),
-                            Voxel_Tris.GetLeftTris(0, 0, 0),
-                            Voxel_Tris.GetRightTris(0, 0, 0),
-                            Voxel_Tris.GetTopTris(0, 0, 0),
-                            Voxel_Tris.GetBottomTris(0, 0, 0) };
-
-        foreach (int[] ints in alltris)
-        {
-            foreach (int i in ints)
-            {
-                tris.Add(i);
-            }
-        }
-
-        GameObject obj = new GameObject();
-        MeshCollider meshCollider = obj.AddComponent<MeshCollider>();
-        MeshFilter meshFilter = obj.AddComponent<MeshFilter>();
-        MeshRenderer meshRenderer = obj.AddComponent<MeshRenderer>();
-
-        Mesh mesh = new Mesh();
-        mesh.vertices = vectors.ToArray();
-        mesh.triangles = tris.ToArray();
-        mesh.RecalculateBounds();
-        mesh.RecalculateNormals();
-
-        meshFilter.mesh = mesh;
-        meshCollider.sharedMesh = mesh;
-
+        yield return new WaitForEndOfFrame();
     }
 
     // Update is called once per frame

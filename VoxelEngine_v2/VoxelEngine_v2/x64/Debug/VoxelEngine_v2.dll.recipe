@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Ethan Projects\VoxelEngine_V2\x64\Debug\VoxelEngine_v2.dll</FullPath>
+      <FullPath>C:\Ethan Projects\UnityVoxelEngine_v2\VoxelEngine_v2\x64\Debug\VoxelEngine_v2.dll</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />
