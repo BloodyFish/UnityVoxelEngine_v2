@@ -8,7 +8,7 @@ A voxel engine prototype built in **Unity** using a hybrid **C# and C++ architec
 
 ---
 
-## Overview
+## 📖 Overview
 
 Unity Voxel Engine v2 is an experimental voxel engine that separates responsibilities between Unity scripts and native C++ code. Unity handles project structure, scripting, and engine integration, while performance-sensitive logic is implemented in a compiled native library.
 
@@ -16,7 +16,7 @@ This repository serves as a technical demonstration of Unity-to-native code inte
 
 ---
 
-## Current Features
+## 📋 Current Features
 
 - Unity project configured for voxel engine development  
 - Native **C++ DLL integration** (`VoxelEngine_v2.dll`)  
@@ -26,7 +26,7 @@ This repository serves as a technical demonstration of Unity-to-native code inte
 
 ---
 
-## Project Structure
+## 📑 Project Structure
 
 ```
 UnityVoxelEngine_v2
@@ -44,7 +44,7 @@ UnityVoxelEngine_v2
 
 ---
 
-## Architecture
+## 📊 Architecture
 
 ### Unity (C#)
 
@@ -68,7 +68,7 @@ Unity scripts interface with the native library to execute voxel processing task
 
 ---
 
-## Requirements
+## 🤔 Requirements
 
 - Unity (Version compatible with project settings)  
 - Visual Studio or another C# development environment  
@@ -76,7 +76,7 @@ Unity scripts interface with the native library to execute voxel processing task
 
 ---
 
-## Setup
+## 💻 Setup
 
 ### Clone Repository
 
@@ -93,7 +93,7 @@ git clone https://github.com/BloodyFish/UnityVoxelEngine_v2.git
 
 ---
 
-## Native DLL
+## 📚 Native DLL
 
 The project includes a prebuilt native library:
 
@@ -105,22 +105,22 @@ If you modify the C++ source project, rebuild the DLL and replace the existing f
 
 ---
 
-## Purpose of the Project
+## 🔬 Purpose of the Project
 
 This project is intended as:
 
-- A voxel engine prototype  
+- A voxel engine for Unity  
 - A demonstration of Unity and native C++ interoperability  
-- A foundation for voxel engine experimentation and research  
+- A foundation for voxel based games  
 
 ---
 
-## Generative AI Disclaimer
-Generative AI was only used for bug fixing and to help research important concepts. Minimal code was written by Generative AI.
+## 🤔 Generative AI Disclaimer
+Generative AI was only used for bug fixing and to help research important concepts. **Minimal code was written by Generative AI**.
 
 ---
 
-## License
+## ⚖️ License
 
 This project is licensed under the **MIT License with Commons Clause**.
 
