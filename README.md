@@ -115,6 +115,11 @@ This project is intended as:
 
 ---
 
+## Generative AI Disclaimer
+Generative AI was only used for bug fixing and to help research important concepts. Minimal code was written by Generative AI.
+
+---
+
 ## License
 
 This project is licensed under the **MIT License with Commons Clause**.
