@@ -27,8 +27,12 @@ public class Chunk
         obj.AddComponent<MeshCollider>();
         obj.AddComponent<MeshFilter>();
         obj.AddComponent<MeshRenderer>();
-        obj.GetComponent<Renderer>().material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
 
+        Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+        mat.mainTexture = Resources.Load<Texture2D>("terrain");
+        mat.SetFloat("_Smoothness", 0);
+
+        obj.GetComponent<Renderer>().material = mat;
     }
 
 
@@ -74,12 +78,18 @@ public class Chunk
     {
         List<Vector3> verts = new List<Vector3>();
         List<int> tris = new List<int>();
+        List<Vector2> UVs = new List<Vector2>();
 
         int index = 0;
         foreach (var i in blocks)
         {
             if (i > 0)
             {
+                //Generate a random texture coordinate (FOR TESTING)
+                int textureCoord_x = UnityEngine.Random.Range(0, 16);
+                int textureCoord_y = UnityEngine.Random.Range(0, 16);
+                Vector2 textureCoord = new Vector2(textureCoord_x, textureCoord_y);
+            
                 int x = index % width;
                 int z = (index / width) % length;
                 int y = (index / (width * length)) % height;
@@ -97,6 +107,7 @@ public class Chunk
                             int offset = verts.Count;
                             verts.AddRange(Voxel_Verts.GetRightFace(x, y, z));
                             tris.AddRange(Voxel_Tris.GenerateTris(offset));
+                            UVs.AddRange(GetUVs(textureCoord));
                         }
                     }
                 }
@@ -109,6 +120,7 @@ public class Chunk
                         int offset = verts.Count;
                         verts.AddRange(Voxel_Verts.GetRightFace(x, y, z));
                         tris.AddRange(Voxel_Tris.GenerateTris(offset));
+                        UVs.AddRange(GetUVs(textureCoord));
                     }
                 }
 
@@ -122,6 +134,7 @@ public class Chunk
                             int offset = verts.Count;
                             verts.AddRange(Voxel_Verts.GetLeftFace(x, y, z));
                             tris.AddRange(Voxel_Tris.GenerateTris(offset));
+                            UVs.AddRange(GetUVs(textureCoord));
                         }
                     }
                 }
@@ -135,6 +148,7 @@ public class Chunk
                         int offset = verts.Count;
                         verts.AddRange(Voxel_Verts.GetLeftFace(x, y, z));
                         tris.AddRange(Voxel_Tris.GenerateTris(offset));
+                        UVs.AddRange(GetUVs(textureCoord));
                     }
                 }
 
@@ -149,6 +163,7 @@ public class Chunk
                             int offset = verts.Count;
                             verts.AddRange(Voxel_Verts.GetFrontFace(x, y, z));
                             tris.AddRange(Voxel_Tris.GenerateTris(offset));
+                            UVs.AddRange(GetUVs(textureCoord));
                         }
                     }
                 }
@@ -162,6 +177,7 @@ public class Chunk
                         int offset = verts.Count;
                         verts.AddRange(Voxel_Verts.GetFrontFace(x, y, z));
                         tris.AddRange(Voxel_Tris.GenerateTris(offset));
+                        UVs.AddRange(GetUVs(textureCoord));
                     }
                 }
 
@@ -175,6 +191,7 @@ public class Chunk
                             int offset = verts.Count;
                             verts.AddRange(Voxel_Verts.GetBackFace(x, y, z));
                             tris.AddRange(Voxel_Tris.GenerateTris(offset));
+                            UVs.AddRange(GetUVs(textureCoord));
                         }
                     }
                 }
@@ -188,6 +205,7 @@ public class Chunk
                         int offset = verts.Count;
                         verts.AddRange(Voxel_Verts.GetBackFace(x, y, z));
                         tris.AddRange(Voxel_Tris.GenerateTris(offset));
+                        UVs.AddRange(GetUVs(textureCoord));
                     }
                 }
 
@@ -201,6 +219,7 @@ public class Chunk
                         int offset = verts.Count;
                         verts.AddRange(Voxel_Verts.GetTopFace(x, y, z));
                         tris.AddRange(Voxel_Tris.GenerateTris(offset));
+                        UVs.AddRange(GetUVs(textureCoord));
                     }
                 }
 
@@ -213,6 +232,7 @@ public class Chunk
                         int offset = verts.Count;
                         verts.AddRange(Voxel_Verts.GetBottomFace(x, y, z));
                         tris.AddRange(Voxel_Tris.GenerateTris(offset));
+                        UVs.AddRange(GetUVs(textureCoord));
                     }
                 }
             }
@@ -223,12 +243,49 @@ public class Chunk
         Mesh mesh = new Mesh();
         mesh.vertices = verts.ToArray();
         mesh.triangles = tris.ToArray();
-        mesh.RecalculateBounds();
+        mesh.uv = UVs.ToArray();
+        mesh.Optimize();
         mesh.RecalculateNormals();
 
         obj.GetComponent<MeshFilter>().mesh = mesh;
         obj.GetComponent<MeshCollider>().sharedMesh = mesh;
 
+    }
+
+    private List<Vector2> GetUVs(Vector2 textureCoord)
+    {
+        // The coordinates of our texture atlas are as follows:
+        Vector2 topLeft = new Vector2(0, 1);
+        Vector2 topRight = new Vector2(1, 1);
+        Vector2 bottomLeft = new Vector2(0, 0);
+        Vector2 bottomRight = new Vector2(1, 0);
+
+
+        // Our texture atlas is 16x16 textures wide
+        float textureStep = 1f / 16f;
+
+
+        List<Vector2> UVs = new List<Vector2>();
+        float x = textureStep * (textureCoord.x);
+        float y = textureStep * (textureCoord.y);
+        float x1 = textureStep * (textureCoord.x + 1);
+        float y1 = textureStep * (textureCoord.y + 1);
+
+
+        // BOTTOM LEFT
+        UVs.Add(new Vector2(x, y));
+
+        // TOP LEFT
+        UVs.Add(new Vector2(x, y1));
+
+        // TOP RIGHT
+        UVs.Add(new Vector2(x1, y1));
+
+        // BOTTOM RIGHT
+        UVs.Add(new Vector2(x1, y));
+
+
+        return UVs;
     }
 
     private int GetFlatIndex(int x, int y, int z)

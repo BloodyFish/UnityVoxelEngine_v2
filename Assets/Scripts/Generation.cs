@@ -27,16 +27,6 @@ public class Generation : MonoBehaviour
                 StartCoroutine(GenerateChunk(x, z));            
             }
         }
-
-        /*for (int x = 0; x < 32; x++)
-        {
-            for (int z = 0; z < 32; z++)
-            {
-                chunkDictionary.TryGetValue(new Vector3(x * 16, 0, z * 16), out Chunk chunk);
-                chunk.Meshify();
-            }
-        }*/
-
     }
 
     IEnumerator GenerateChunk(int x, int z)
@@ -48,11 +38,5 @@ public class Generation : MonoBehaviour
         chunk.Generate();
 
         yield return new WaitForEndOfFrame();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }
