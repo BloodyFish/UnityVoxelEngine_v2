@@ -115,6 +115,11 @@ This project is intended as:
 
 ---
 
+## 🖌️ Textures 
+The placeholder textures used are from the now discontinued and open source Minecraft texture pack, [Lumino](https://www.planetminecraft.com/texture-pack/16x-lumino-its-finally-out-a-bright-fluffy-rpg-pack/), by [peytonisgreat](https://www.planetminecraft.com/member/peytonisgreat/).
+
+---
+
 ## 🤔 Generative AI Disclaimer
 Generative AI was only used for bug fixing and to help research important concepts. **Minimal code was written by Generative AI**.
 
