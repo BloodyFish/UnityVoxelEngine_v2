@@ -6,9 +6,6 @@
 #define VERTEX_API __declspec(dllimport)
 #endif
 
-
-#include <vector>
-
 extern "C" {
 	VERTEX_API float* FrontFace(float x, float y, float z);
 	VERTEX_API float* BackFace(float x, float y, float z);

@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Stone
   m_EditorClassIdentifier: Assembly-CSharp::Block
   blockID: 1
-  blockID_front: 1
-  blockID_back: 1
-  blockID_left: 1
-  blockID_right: 1
-  blockID_top: 1
-  blockID_bottom: 1
+  texCoord_front: {x: 1, y: 15}
+  texCoord_back: {x: 1, y: 15}
+  texCoord_left: {x: 1, y: 15}
+  texCoord_right: {x: 1, y: 15}
+  texCoord_top: {x: 1, y: 15}
+  texCoord_bottom: {x: 1, y: 15}
   blockName: Stone

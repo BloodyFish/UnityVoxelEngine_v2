@@ -102,7 +102,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>TRIS_EXPORTS;VERTEX_EXPORTS;NOISE_EXPORTS;CHUNK_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>TRIS_EXPORTS;VERTEX_EXPORTS;NOISE_EXPORTS;CHUNK_EXPORTS;UV_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -117,7 +117,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>TRIS_EXPORTS;VERTEX_EXPORTS;NOISE_EXPORTS;CHUNK_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>TRIS_EXPORTS;VERTEX_EXPORTS;NOISE_EXPORTS;CHUNK_EXPORTS;UV_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -131,12 +131,14 @@
     <ClCompile Include="Noise.cpp" />
     <ClCompile Include="Tris.cpp" />
     <ClCompile Include="Tris.h" />
+    <ClCompile Include="UV.cpp" />
     <ClCompile Include="Vertex.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Chunk.h" />
     <ClInclude Include="FastNoiseLite.h" />
     <ClInclude Include="Noise.h" />
+    <ClInclude Include="UV.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

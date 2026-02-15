@@ -16,6 +16,12 @@ public class Generation : MonoBehaviour
     [DllImport("VoxelEngine_v2", EntryPoint = "NoiseInit")]
     public static extern void NoiseInit(int seed, float frequency, int octaves, float lacunarity, float gain);
 
+    private void OnEnable()
+    {
+        // In order to get the correct texture, we need to get all the possible blocks out of the Resources folder
+        Block.possibleBlocks = Resources.LoadAll<Block>("Blocks");
+    }
+
     void Start()
     {
         NoiseInit(seed, frequency, octaves, lacunarity, gain);
