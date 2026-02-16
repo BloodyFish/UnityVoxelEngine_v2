@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu]
@@ -16,4 +18,20 @@ public class Block : ScriptableObject
 
     [HideInInspector]
     public static Block[] possibleBlocks;
+
+    [HideInInspector] public const int STONE = 1;
+    [HideInInspector] public const int DIRT = 2;
+    [HideInInspector] public const int GRASS = 3;
+    [HideInInspector] public const int SNOW = 4;
+
+}
+
+public class BlockComparer: IComparer<Block>
+{
+    public int Compare(Block x, Block y)
+    {
+        if (x.blockID > y.blockID) return 1;
+        if (x.blockID < y.blockID) return -1;
+        return 0;
+    }
 }

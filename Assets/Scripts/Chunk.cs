@@ -64,6 +64,8 @@ public class Chunk
             Generation.chunkDictionary.TryGetValue(new Vector3Int(pos.x, pos.y, pos.z + length), out Chunk frontChunk);
             Generation.chunkDictionary.TryGetValue(new Vector3Int(pos.x, pos.y, pos.z - length), out Chunk backChunk);
 
+            this.TerrainPaint();
+
             this.Meshify();
             rightChunk?.Meshify();
             leftChunk?.Meshify();
@@ -279,6 +281,99 @@ public class Chunk
         obj.GetComponent<MeshFilter>().mesh = mesh;
         obj.GetComponent<MeshCollider>().sharedMesh = mesh;
 
+    }
+
+    private void TerrainPaint()
+    {
+        int index = 0;
+        foreach (var i in blocks)
+        {
+            if (i > 0)
+            {
+                int x = index % width;
+                int z = (index / width) % length;
+                int y = (index / (width * length)) % height;
+               
+                if(y >= height - UnityEngine.Random.Range(60, 75) && y <= height)
+                {
+                    blocks[index] = Block.SNOW;
+                }
+                else if (GetSlopeOfPoint(x, y, z) >= 1.25f)
+                {
+                    blocks[index] = Block.STONE;
+                }
+                else if (blocks[GetFlatIndex(x, y + 1, z)] == 0)
+                {
+                    blocks[index] = Block.GRASS;
+                }
+                else
+                {
+                    blocks[index] = Block.DIRT;
+                }
+            }
+
+            index++;
+        }
+    }
+
+    private float GetSlopeOfPoint(int x, int y, int z)
+    {
+        int y1 = y;
+        int x1 = x;
+        int z1 = z;
+
+        int y2 = y;
+        int x2 = x;
+        int z2 = z;
+
+        if (x > 0 && x <= width - 1) x1 = x - 1;
+        if (x >= 0 && x < width - 1) x2 = x + 1;
+        if (z > 0 && z <= length - 1) z1 = z - 1;
+        if (z >= 0 && z < length - 1) z2 = z + 1;
+
+        for (int i = 0; i < height - 1; i++)
+        {
+            if (blocks[GetFlatIndex(x1, i + 1, z)] == 0)
+            {
+                y1 = i;
+                break;
+            }
+        }
+
+        for (int i = 0; i < height - 1; i++)
+        {
+            if (blocks[GetFlatIndex(x2, i + 1, z)] == 0)
+            {
+                y2 = i;
+                break;
+            }
+        }
+
+        float slope1 = Math.Abs((float)(y2 - y1) / (float)(x2 - x1));
+
+
+        for (int i = 0; i < height - 1; i++)
+        {
+            if (blocks[GetFlatIndex(x, i + 1, z1)] == 0)
+            {
+                y1 = i;
+                break;
+            }
+        }
+
+        for (int i = 0; i < height - 1; i++)
+        {
+            if (blocks[GetFlatIndex(x, i + 1, z2)] == 0)
+            {
+                y2 = i;
+                break;
+            }
+        }
+
+        float slope2 = Math.Abs((float)(y2 - y1) / (float)(z2 - z1));
+        float slope = (slope1 + slope2) / 2;
+
+        return slope;
     }
 
     private static Vector2[] GetResult(IntPtr ptr)

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -19,7 +20,16 @@ public class Generation : MonoBehaviour
     private void OnEnable()
     {
         // In order to get the correct texture, we need to get all the possible blocks out of the Resources folder
-        Block.possibleBlocks = Resources.LoadAll<Block>("Blocks");
+        // The blocks in possibleBlocks should be sorted by their blockID.
+        // So a block with blockID 1 should be at index 0, a block with blockID 2 should be at index 1, and so on.
+        List<Block> possibleBlocks_list = Resources.LoadAll<Block>("Blocks").ToList();
+        possibleBlocks_list.Sort(new BlockComparer());
+        Block.possibleBlocks = possibleBlocks_list.ToArray();
+
+        foreach(var i in Block.possibleBlocks)
+        {
+            print("Block:" + i.name + " ID: " + i.blockID);
+        }
     }
 
     void Start()

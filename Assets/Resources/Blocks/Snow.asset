@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4d46532c31ac7004daad140866c2ca94, type: 3}
-  m_Name: Stone
+  m_Name: Snow
   m_EditorClassIdentifier: Assembly-CSharp::Block
-  blockName: Stone
-  blockID: 1
-  texCoord_front: {x: 1, y: 15}
-  texCoord_back: {x: 1, y: 15}
-  texCoord_left: {x: 1, y: 15}
-  texCoord_right: {x: 1, y: 15}
-  texCoord_top: {x: 1, y: 15}
-  texCoord_bottom: {x: 1, y: 15}
+  blockName: Snow
+  blockID: 4
+  texCoord_front: {x: 2, y: 11}
+  texCoord_back: {x: 2, y: 11}
+  texCoord_left: {x: 2, y: 11}
+  texCoord_right: {x: 2, y: 11}
+  texCoord_top: {x: 2, y: 11}
+  texCoord_bottom: {x: 2, y: 11}
