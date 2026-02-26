@@ -22,7 +22,8 @@ public class Block : ScriptableObject
     [HideInInspector] public const int STONE = 1;
     [HideInInspector] public const int DIRT = 2;
     [HideInInspector] public const int GRASS = 3;
-    [HideInInspector] public const int SNOW = 4;
+    [HideInInspector] public const int SAND = 4;
+    [HideInInspector] public const int SNOW = 5;
 
 }
 

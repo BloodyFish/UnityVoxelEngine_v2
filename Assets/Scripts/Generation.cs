@@ -12,6 +12,7 @@ public class Generation : MonoBehaviour
     [SerializeField] float lacunarity;
     [SerializeField] float gain;
 
+    public static System.Random random;
     public static Dictionary<Vector3, Chunk> chunkDictionary = new Dictionary<Vector3, Chunk>();
 
     [DllImport("VoxelEngine_v2", EntryPoint = "NoiseInit")]
@@ -26,33 +27,28 @@ public class Generation : MonoBehaviour
         possibleBlocks_list.Sort(new BlockComparer());
         Block.possibleBlocks = possibleBlocks_list.ToArray();
 
-        foreach(var i in Block.possibleBlocks)
-        {
-            print("Block:" + i.name + " ID: " + i.blockID);
-        }
+        random = new System.Random(seed);
     }
 
     void Start()
     {
-        NoiseInit(seed, frequency, octaves, lacunarity, gain);
+        NoiseInit(seed, frequency / 1000, octaves, lacunarity, gain);
+        StartCoroutine(GenerateChunk());
+    }
 
-        for(int x = 0; x < 32; x++)
+    IEnumerator GenerateChunk()
+    {
+        for (int x = 0; x < 64; x++)
         {
-            for(int z = 0; z < 32; z++)
+            for (int z = 0; z < 64; z++)
             {
-                StartCoroutine(GenerateChunk(x, z));            
+                Chunk chunk = new Chunk(16, 16, 384, new Vector3Int(x * 16, 0, z * 16));
+                chunkDictionary.Add(new Vector3Int(x * 16, 0, z * 16), chunk);
+                chunk.Generate();
+
+                yield return new WaitForEndOfFrame();
             }
         }
     }
 
-    IEnumerator GenerateChunk(int x, int z)
-    {
-        Chunk chunk = new Chunk(16, 16, 124, new Vector3Int(x * 16, 0, z * 16));
-        chunkDictionary.Add(new Vector3Int(x * 16, 0, z * 16), chunk);
-
-        // coroutines are not iterative, they can be executed by Unity in any order. Due to factors outside our control, we should put Generate() last
-        chunk.Generate();
-
-        yield return new WaitForEndOfFrame();
-    }
 }

@@ -7,7 +7,7 @@
 #endif
 
 extern "C" {
-	CHUNK_API int* GenerateChunkValues(int width, int length, int height, int xPos, int zPos);
+	CHUNK_API int* GenerateChunkValues(int width, int length, int height, int yOffset, int xPos, int zPos, float* continentalness, float* heightFromContinentalness, int splineLength);
 
 	// Free array from memory
 	CHUNK_API void DeleteChunkValues(int* ptr);

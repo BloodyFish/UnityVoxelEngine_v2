@@ -15,29 +15,14 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Vertex.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Tris.h">
-      <Filter>Header Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Tris.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Noise.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Chunk.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="UV.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Vertex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Noise.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -45,9 +30,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Chunk.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="UV.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
