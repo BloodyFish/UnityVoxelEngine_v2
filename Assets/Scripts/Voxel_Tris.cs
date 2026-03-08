@@ -1,14 +1,12 @@
-using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using Unity.Burst;
-using UnityEngine;
+using Unity.Collections;
 
-[BurstCompile]
 public class Voxel_Tris
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
+    // It's a lot faster to pass in a list and add to it then creating a new list and instantiating it with stuff
     public static void GenerateTris(List<int> tris, int offset)
     {
         tris.Add(0 + offset);

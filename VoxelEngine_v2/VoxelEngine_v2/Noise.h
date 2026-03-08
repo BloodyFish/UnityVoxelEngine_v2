@@ -10,10 +10,14 @@
 
 class Noise {
 	public:
-		static FastNoiseLite noise;
-		static void Init(int seed, float frequency, int octaves, float lacunarity, float gain);
+		static FastNoiseLite noise2D;
+		static FastNoiseLite noise3D;
+
+		static void Init_2D(int seed, float frequency, int octaves, float lacunarity, float gain);
+		static void Init_3D(int seed, float frequency, int octaves, float lacunarity, float gain);
 };
 
 extern "C" {
-	NOISE_API void NoiseInit(int seed, float frequency, int octaves, float lacunarity, float gain);
+	NOISE_API void NoiseInit_2D(int seed, float frequency, int octaves, float lacunarity, float gain);
+	NOISE_API void NoiseInit_3D(int seed, float frequency, int octaves, float lacunarity, float gain);
 }

@@ -148,11 +148,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb7acf31bd505ea4e9438b5a06cc8d6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Generation
-  seed: 123456789
-  frequency: 1
-  octaves: 4
-  lacunarity: 4.15
-  gain: 0.25
+  noise2DParam: {fileID: 11400000, guid: fb81674c188347645b353f7a059f8085, type: 2}
+  noise3DParam: {fileID: 11400000, guid: c1aece3c99ea4e043b0a43c02ffde138, type: 2}
+  seed: 1087654321
 --- !u!4 &116216381
 Transform:
   m_ObjectHideFlags: 0
@@ -344,8 +342,8 @@ Light:
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
-    m_Bias: 0.05
-    m_NormalBias: 0.4
+    m_Bias: 0
+    m_NormalBias: 0
     m_NearPlane: 0.2
     m_CullingMatrixOverride:
       e00: 1
@@ -415,7 +413,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UsePipelineSettings: 1
+  m_UsePipelineSettings: 0
   m_AdditionalLightsShadowResolutionTier: 2
   m_CustomShadowLayers: 0
   m_LightCookieSize: {x: 1, y: 1}
