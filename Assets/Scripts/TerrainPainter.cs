@@ -1,3 +1,6 @@
+using UnityEngine;
+using UnityEngine.UIElements;
+
 public class TerrainPainter
 {
     public static void Paint(int[] blocks)
@@ -5,11 +8,13 @@ public class TerrainPainter
         int index = 0;
         foreach (var i in blocks)
         {
+            int x = index % Chunk.Width;
+            int z = (index / Chunk.Width) % Chunk.Length;
+            int y = (index / (Chunk.Width * Chunk.Length)) % Chunk.Height;
+
+            // Paint terrain
             if (i > 0)
             {
-                int x = index % Chunk.Width;
-                int z = (index / Chunk.Width) % Chunk.Length;
-                int y = (index / (Chunk.Width * Chunk.Length)) % Chunk.Height;
 
                 if (y >= Generation.SCALE - Generation.random.Next(60, 75))
                 {
@@ -28,6 +33,11 @@ public class TerrainPainter
                 {
                     blocks[index] = Block.SAND;
                 }
+            }
+
+            // Paint water
+            if(y <= Generation.waterLevel && i == 0) {
+                blocks[index] = -1;
             }
 
             index++;

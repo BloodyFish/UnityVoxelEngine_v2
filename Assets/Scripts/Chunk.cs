@@ -9,7 +9,6 @@ public class Chunk
 {
     // Whenever we add or remove from this list within a thread, we need to use a lock!
     public static List<Chunk> busyChunks = new List<Chunk>();
-    public static readonly object _lock = new object();
 
     public readonly int[] blocks;
     public Vector3Int pos;
@@ -22,8 +21,8 @@ public class Chunk
     public GameObject obj;
     public GameObject water;
 
-    private static Material mat = Resources.Load<Material>("ChunkMaterial");
-    private static Material waterMat = Resources.Load<Material>("WaterMaterial");
+    private static readonly Material mat = Resources.Load<Material>("ChunkMaterial");
+    private static readonly Material waterMat = Resources.Load<Material>("WaterMaterial");
 
     public Task generationTask;
     public bool isMeshing = false;
@@ -63,12 +62,25 @@ public class Chunk
 
     public void Generate()
     {
-        obj = new GameObject();
+        obj = new GameObject("Chunk");
         obj.transform.position = pos;
         obj.AddComponent<MeshCollider>();
         obj.AddComponent<MeshFilter>();
         obj.AddComponent<MeshRenderer>();
         obj.GetComponent<Renderer>().material = mat;
+
+
+        // INITIALIZE WATER SUB-CHUNK
+        water = new GameObject("Water");
+        water.transform.position = pos;
+        water.AddComponent<MeshCollider>();
+        water.AddComponent<MeshFilter>();
+        water.AddComponent<MeshRenderer>();
+        water.GetComponent<Renderer>().material = waterMat;
+
+
+        water.transform.parent = obj.transform;
+
 
         float[] continentalness = Generation.continentalness;
         float[] heightFromContinentalness = Generation.heightFromContinentalness;
@@ -85,40 +97,16 @@ public class Chunk
             IntPtr ptr = GenerateChunkValues(Width, Length, Height, 0, pos.x, pos.z, continentalnessPointer, heightFromContinentalnessPointer, continentalness.Length);
 
             Marshal.Copy(ptr, blocks, 0, size);
-
             DeleteChunkValues(ptr);
+
 
             TerrainPainter.Paint(blocks);
 
-            generationTask = Task.Run(() => {
-                if (isMeshing) return;
-
-                lock (_lock)
-                {
-                    busyChunks.Add(this);
-                }
-
-                mesher.GenerateMeshValues();
-            });
+            startMeshGen();
 
             foreach(Chunk n in GetChunkNeighbors())
             {
-                if (n != null)
-                {
-                    if (n.isMeshing) return;
-
-                    n.generationTask = Task.Run(() => {
-                        // Becuase threading can happen at any point,
-                        // we need to put in in the lock since all threads check the lock one at a time and will not do anything if they see that there's a mesh job happening
-
-                        lock (_lock)
-                        {
-                            busyChunks.Add(n);
-                        }
-
-                        n.mesher.GenerateMeshValues();
-                    });
-                }
+                n?.startMeshGen();
             }
         }
         catch(Exception e)
@@ -132,63 +120,27 @@ public class Chunk
         }
     }
 
-    public void GenerateWaterSubChunk()
+    public void startMeshGen()
     {
-        water = new GameObject();
-        water.transform.position = pos;
-        water.AddComponent<MeshCollider>();
-        water.AddComponent<MeshFilter>();
-        water.AddComponent<MeshRenderer>();
-        water.GetComponent<Renderer>().material = waterMat;
-
-
-        water.transform.parent = obj.transform;
-
-        for (int x = 0; x < Width; x++)
-        {
-            for(int z  = 0; z < Length; z++)
-            {
-                for(int y = Height - 1; y > 0; y--)
-                {
-                    int index = GetFlatIndex(x, y, z);
-                    if(y <= Generation.waterLevel && blocks[index] == 0) { blocks[index] = -1; }
-                }
-            }
-        }
-
         if (isMeshing) return;
 
-        generationTask = Task.Run(() => {
+        // We don't return if busyChunks contains our current chunk becuase that will cause holes
+        if(!busyChunks.Contains(this)) busyChunks.Add(this);
+
+        generationTask = Task.Run(() => 
+        {
+            mesher.GenerateMeshValues();
             mesher.GenerateMeshValuesWater();
         });
-
-        foreach (Chunk n in GetChunkNeighbors())
-        {
-            if(n != null)
-            {
-                if (n.isMeshing) return;
-
-                n.generationTask = Task.Run(() => {
-                    n.mesher.GenerateMeshValuesWater();
-                });
-            }
-        }
     }
+
     public void Meshify()
     {
         isMeshing = true;
         Mesher.Meshify(obj, terrainMeshValues);
+        Mesher.Meshify(water, waterMeshValues);
         
-        if(water != null)
-        {
-            Mesher.Meshify(water, waterMeshValues);
-
-            lock (_lock)
-            {
-                busyChunks.Remove(this);
-            }
-        }
-
+        busyChunks.Remove(this);
         isMeshing = false;
     }
 

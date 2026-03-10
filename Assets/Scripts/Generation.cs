@@ -80,10 +80,6 @@ public class Generation : MonoBehaviour
                 chunk.Generate();
 
                 yield return null;
-
-                chunk.GenerateWaterSubChunk();
-
-                yield return null;
             }
         }
     }
@@ -92,14 +88,7 @@ public class Generation : MonoBehaviour
     {
         while (true)
         {
-            List<Chunk> chunks;
-
-            lock (Chunk._lock)
-            {
-                chunks = Chunk.busyChunks.ToList();
-            }
-
-            foreach (Chunk chunk in chunks)
+            foreach (Chunk chunk in Chunk.busyChunks.ToList())
             {
                 if (chunk.generationTask.IsCompleted && !chunk.isMeshing)
                 {

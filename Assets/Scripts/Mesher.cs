@@ -35,6 +35,10 @@ public class Mesher
     {
         MeshValues values = chunk.terrainMeshValues;
 
+        values.verts.Clear();
+        values.tris.Clear();
+        values.UVs.Clear();
+
         int index = 0;
         foreach (var i in chunk.blocks)
         {
@@ -204,6 +208,10 @@ public class Mesher
     public void GenerateMeshValuesWater()
     {
         MeshValues values = chunk.waterMeshValues;
+
+        values.verts.Clear();
+        values.tris.Clear();
+        values.UVs.Clear();
 
         int index = 0;
         foreach (var i in chunk.blocks)
