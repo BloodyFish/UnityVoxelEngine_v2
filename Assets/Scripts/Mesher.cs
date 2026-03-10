@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using static Unity.Collections.AllocatorManager;
 
 public struct MeshValues
 {
@@ -18,23 +17,12 @@ public class Mesher
         this.chunk = chunk;
     }
 
-    public static void Meshify(object _lock, GameObject obj, MeshValues values)
+    public static void Meshify(GameObject obj, MeshValues values)
     {
-        Vector3[] verts;
-        int[] tris;
-        Vector2[] uvs;
-
-        lock (_lock) // lock your chunk while copying
-        {
-            verts = values.verts.ToArray();
-            tris = values.tris.ToArray();
-            uvs = values.UVs.ToArray();
-        }
-
         Mesh mesh = new Mesh();
-        mesh.vertices = verts;
-        mesh.triangles = tris;
-        mesh.uv = uvs;
+        mesh.vertices = values.verts.ToArray();
+        mesh.triangles = values.tris.ToArray();
+        mesh.uv = values.UVs.ToArray();
 
         mesh.Optimize();
         mesh.RecalculateNormals();

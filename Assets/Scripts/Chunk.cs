@@ -9,8 +9,7 @@ public class Chunk
 {
     // Whenever we add or remove from this list within a thread, we need to use a lock!
     public static List<Chunk> busyChunks = new List<Chunk>();
-    public static object _lock = new object();
-    public readonly object _meshLock = new object();
+    public static readonly object _lock = new object();
 
     public readonly int[] blocks;
     public Vector3Int pos;
@@ -26,7 +25,7 @@ public class Chunk
     private static Material mat = Resources.Load<Material>("ChunkMaterial");
     private static Material waterMat = Resources.Load<Material>("WaterMaterial");
 
-    public bool doneGenerating = false;
+    public Task generationTask;
     public bool isMeshing = false;
 
     public Mesher mesher;
@@ -91,52 +90,33 @@ public class Chunk
 
             TerrainPainter.Paint(blocks);
 
-            Task.Run(() => {
-                lock (_meshLock)
-                {
-                    if (isMeshing) return;
-                    isMeshing = true;
-                }
+            generationTask = Task.Run(() => {
+                if (isMeshing) return;
 
                 lock (_lock)
                 {
-                    doneGenerating = false;
                     busyChunks.Add(this);
                 }
 
                 mesher.GenerateMeshValues();
-
-                lock (_meshLock)
-                {
-                    isMeshing = false;
-                }
             });
 
             foreach(Chunk n in GetChunkNeighbors())
             {
                 if (n != null)
                 {
-                    Task.Run(() => {
+                    if (n.isMeshing) return;
+
+                    n.generationTask = Task.Run(() => {
                         // Becuase threading can happen at any point,
-                        // we need to put in in the lock since all threads check the lock one at a time and will not do anything if they see that theres a mesh job happening
-                        lock (n._meshLock)
-                        {
-                            if (n.isMeshing) return;
-                            n.isMeshing = true;
-                        }
+                        // we need to put in in the lock since all threads check the lock one at a time and will not do anything if they see that there's a mesh job happening
 
                         lock (_lock)
                         {
-                            n.doneGenerating = false;
                             busyChunks.Add(n);
                         }
 
                         n.mesher.GenerateMeshValues();
-
-                        lock (n._meshLock)
-                        {
-                            n.isMeshing = false;
-                        }
                     });
                 }
             }
@@ -176,55 +156,40 @@ public class Chunk
             }
         }
 
-        Task.Run(() => {
-            lock (_meshLock)
-            {
-                if (isMeshing) return;
-                isMeshing = true;
-            }
-            mesher.GenerateMeshValuesWater();
-            doneGenerating = true;
+        if (isMeshing) return;
 
-            lock (_meshLock)
-            {
-                isMeshing = false;
-            }
+        generationTask = Task.Run(() => {
+            mesher.GenerateMeshValuesWater();
         });
 
         foreach (Chunk n in GetChunkNeighbors())
         {
             if(n != null)
             {
-                Task.Run(() => {
-                    lock (n._meshLock)
-                    {
-                        if (n.isMeshing) return;
-                        n.isMeshing = true;
-                    }
-                    n.mesher.GenerateMeshValuesWater();
-                    n.doneGenerating = true;
+                if (n.isMeshing) return;
 
-                    lock (n._meshLock)
-                    {
-                        n.isMeshing = false;
-                    }
+                n.generationTask = Task.Run(() => {
+                    n.mesher.GenerateMeshValuesWater();
                 });
             }
         }
     }
     public void Meshify()
     {
-        Mesher.Meshify(_meshLock, obj, terrainMeshValues);
+        isMeshing = true;
+        Mesher.Meshify(obj, terrainMeshValues);
         
         if(water != null)
         {
-            Mesher.Meshify(_meshLock, water, waterMeshValues);
+            Mesher.Meshify(water, waterMeshValues);
 
             lock (_lock)
             {
                 busyChunks.Remove(this);
             }
         }
+
+        isMeshing = false;
     }
 
     private Chunk[] GetChunkNeighbors()

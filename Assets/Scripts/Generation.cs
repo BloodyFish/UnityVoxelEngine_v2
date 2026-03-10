@@ -101,7 +101,7 @@ public class Generation : MonoBehaviour
 
             foreach (Chunk chunk in chunks)
             {
-                if (chunk.doneGenerating)
+                if (chunk.generationTask.IsCompleted && !chunk.isMeshing)
                 {
                     chunk.Meshify();
                     yield return null;
