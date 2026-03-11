@@ -99,15 +99,17 @@ public class Chunk
             Marshal.Copy(ptr, blocks, 0, size);
             DeleteChunkValues(ptr);
 
-
-            TerrainPainter.Paint(blocks);
-
-            startMeshGen();
-
-            foreach(Chunk n in GetChunkNeighbors())
+            Task.Run(() =>
             {
-                n?.startMeshGen();
-            }
+                TerrainPainter.Paint(blocks);
+
+                startMeshGen();
+
+                foreach(var n in GetChunkNeigbors())
+                {
+                    n?.startMeshGen();
+                }
+            });
         }
         catch(Exception e)
         { 
@@ -120,6 +122,7 @@ public class Chunk
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void startMeshGen()
     {
         if (isMeshing) return;
@@ -134,6 +137,7 @@ public class Chunk
         });
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Meshify()
     {
         isMeshing = true;
@@ -144,14 +148,15 @@ public class Chunk
         isMeshing = false;
     }
 
-    private Chunk[] GetChunkNeighbors()
+    //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private Chunk[] GetChunkNeigbors()
     {
         Generation.chunkDictionary.TryGetValue(new Vector3Int(pos.x + Width, pos.y, pos.z), out Chunk rightChunk);
         Generation.chunkDictionary.TryGetValue(new Vector3Int(pos.x - Width, pos.y, pos.z), out Chunk leftChunk);
         Generation.chunkDictionary.TryGetValue(new Vector3Int(pos.x, pos.y, pos.z + Length), out Chunk frontChunk);
         Generation.chunkDictionary.TryGetValue(new Vector3Int(pos.x, pos.y, pos.z - Length), out Chunk backChunk);
 
-        Chunk[] neighbors = { rightChunk, leftChunk, frontChunk, backChunk };
+        Chunk[] neighbors = {rightChunk, leftChunk, frontChunk, backChunk};
         return neighbors;
     }
 

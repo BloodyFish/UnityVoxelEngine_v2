@@ -344,7 +344,7 @@ public class Mesher
 
                     // Don't draw face ONLY if there's a water block on top
                     // We want to draw faces when there's a solid block above due to the offset of water
-                    if (chunk.blocks[topIndex] == 0 || chunk.blocks[topIndex] > 0 && y == Generation.waterLevel)
+                    if (chunk.blocks[topIndex] == 0 || chunk.blocks[topIndex] > 0 && y == Generation.WATER_LEVEL)
                     {
                         int offset = values.verts.Count;
                         Voxel_Verts_Water.TopFace(values.verts, x, y, z);

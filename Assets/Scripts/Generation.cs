@@ -8,8 +8,8 @@ public class Generation : MonoBehaviour
 {
     [SerializeField] NoiseParameters noise2DParam;
     [SerializeField] NoiseParameters noise3DParam;
-    public static int waterLevel = 63;
-    public static int beachHeight = 3;
+    public static int WATER_LEVEL = 63;
+    public static int BEACH_HEIGHT = 3;
     public const int SCALE = 320;
 
     [SerializeField] int seed;
@@ -30,7 +30,7 @@ public class Generation : MonoBehaviour
         // Negative continentalness values will map to ocean and beach heights
         {-1f, 0f },
         {-0.5f, 5f},
-        {-0.2f, waterLevel},
+        {-0.2f, WATER_LEVEL},
         {-0.1f, 65},
 
         // Positive continentalness will map to mountain and hilly heights

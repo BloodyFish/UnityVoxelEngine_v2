@@ -1,5 +1,4 @@
-using UnityEngine;
-using UnityEngine.UIElements;
+using System.Runtime.CompilerServices;
 
 public class TerrainPainter
 {
@@ -12,35 +11,43 @@ public class TerrainPainter
             int z = (index / Chunk.Width) % Chunk.Length;
             int y = (index / (Chunk.Width * Chunk.Length)) % Chunk.Height;
 
-            // Paint terrain
-            if (i > 0)
-            {
-
-                if (y >= Generation.SCALE - Generation.random.Next(60, 75))
-                {
-                    blocks[index] = Block.SNOW;
-                }
-
-                else if (y >= Generation.SCALE - Generation.random.Next(90, 100) || Block.GetSlopeOfBlock(x, y, z, blocks) >= 2.5f) { blocks[index] = Block.STONE; }
-
-                else if (y > (Generation.waterLevel + Generation.beachHeight) - Generation.random.Next(1, 3))
-                {
-                    if (blocks[Chunk.GetFlatIndex(x, y + 1, z)] == 0) { blocks[index] = Block.GRASS; }
-                    else { blocks[index] = Block.DIRT; }
-                }
-
-                else
-                {
-                    blocks[index] = Block.SAND;
-                }
-            }
-
-            // Paint water
-            if(y <= Generation.waterLevel && i == 0) {
-                blocks[index] = -1;
-            }
+            PaintTerrain(i, x, y, z, index, blocks);
+            FillWater(i, y, index, blocks);
 
             index++;
+        }
+    }
+
+    private static void PaintTerrain(int i, int x, int y, int z, int index, int[] blocks)
+    {
+        if (i > 0)
+        {
+            if (y >= Generation.SCALE - Generation.random.Next(60, 75))
+            {
+                blocks[index] = Block.SNOW;
+            }
+
+            else if (y >= Generation.SCALE - Generation.random.Next(90, 100) || Block.GetSlopeOfBlock(x, y, z, blocks) >= 2.5f) { blocks[index] = Block.STONE; }
+
+            else if (y > (Generation.WATER_LEVEL + Generation.BEACH_HEIGHT) - Generation.random.Next(1, 3))
+            {
+                if (blocks[Chunk.GetFlatIndex(x, y + 1, z)] == 0) { blocks[index] = Block.GRASS; }
+                else { blocks[index] = Block.DIRT; }
+            }
+
+            else
+            {
+                blocks[index] = Block.SAND;
+            }
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void FillWater(int i, int y, int index, int[] blocks)
+    {
+        if (y <= Generation.WATER_LEVEL && i == 0)
+        {
+            blocks[index] = -1;
         }
     }
 }
