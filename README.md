@@ -3,7 +3,7 @@
 ![C#](https://img.shields.io/badge/C%23-10.7%25-green)
 ![C](https://img.shields.io/badge/C-0.2%25-gray)
 
-<img width="2558" height="1240" alt="image" src="https://github.com/user-attachments/assets/16906865-6c51-4afb-be41-47e60b1db968" />
+<img width="2560" height="1288" alt="image" src="https://github.com/user-attachments/assets/352e42f0-9368-4f69-bf50-59fd36a2e6ff" />
 
 A voxel engine prototype built in **Unity** using a hybrid **C# and C++ architecture**. The project demonstrates integration between Unity and a native DLL for voxel-related processing.
 
@@ -14,6 +14,8 @@ A voxel engine prototype built in **Unity** using a hybrid **C# and C++ architec
 Unity Voxel Engine v2 is an experimental voxel engine that separates responsibilities between Unity scripts and native C++ code. Unity handles project structure, scripting, and engine integration, while performance-sensitive logic is implemented in a compiled native library.
 
 This repository serves as a technical demonstration of Unity-to-native code interoperability and voxel engine experimentation.
+
+_There is a bug with threading, I am working on fixing it ASAP_
 
 ---
 
