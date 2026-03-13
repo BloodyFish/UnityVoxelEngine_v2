@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class Generation : MonoBehaviour
@@ -12,10 +13,8 @@ public class Generation : MonoBehaviour
     public static int BEACH_HEIGHT = 3;
     public const int SCALE = 320;
 
-    [SerializeField] int seed;
+    public static int seed = 77777777;
 
-
-    public static System.Random random;
     public static Dictionary<Vector3, Chunk> chunkDictionary = new Dictionary<Vector3, Chunk>();
 
     [DllImport("VoxelEngine_v2", EntryPoint = "NoiseInit_2D")]
@@ -51,8 +50,6 @@ public class Generation : MonoBehaviour
         List<Block> possibleBlocks_list = Resources.LoadAll<Block>("Blocks").ToList();
         possibleBlocks_list.Sort(new BlockComparer());
         Block.possibleBlocks = possibleBlocks_list.ToArray();
-
-        random = new System.Random(seed);
     }
 
     void Start()
@@ -77,7 +74,11 @@ public class Generation : MonoBehaviour
             {
                 Chunk chunk = new Chunk(new Vector3Int(x * 16, 0, z * 16));
                 chunkDictionary.Add(new Vector3Int(x * 16, 0, z * 16), chunk);
-                chunk.Generate();
+
+                Task.Run(() =>
+                {
+                    chunk.Generate();
+                });
 
                 yield return null;
             }
@@ -90,7 +91,7 @@ public class Generation : MonoBehaviour
         {
             foreach (Chunk chunk in Chunk.busyChunks.ToList())
             {
-                if (chunk.generationTask.IsCompleted && !chunk.isMeshing)
+                if (!chunk.isGenerating && !chunk.isMeshing)
                 {
                     chunk.Meshify();
                     yield return null;
@@ -100,6 +101,5 @@ public class Generation : MonoBehaviour
             yield return null;
 
         }
-
     }
 }

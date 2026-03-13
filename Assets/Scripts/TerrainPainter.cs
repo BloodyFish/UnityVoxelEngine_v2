@@ -1,9 +1,14 @@
+using System;
 using System.Runtime.CompilerServices;
 
 public class TerrainPainter
 {
     public static void Paint(int[] blocks)
     {
+        // Since .NET 4.8 doesn't support the thread safe version of System.Random (System.Random.Shared)
+        // we have to make a new Random for every thread
+        Random random = new Random(Generation.seed);
+
         int index = 0;
         foreach (var i in blocks)
         {
@@ -11,25 +16,25 @@ public class TerrainPainter
             int z = (index / Chunk.Width) % Chunk.Length;
             int y = (index / (Chunk.Width * Chunk.Length)) % Chunk.Height;
 
-            PaintTerrain(i, x, y, z, index, blocks);
+            PaintTerrain(random, i, x, y, z, index, blocks);
             FillWater(i, y, index, blocks);
 
             index++;
         }
     }
 
-    private static void PaintTerrain(int i, int x, int y, int z, int index, int[] blocks)
-    {
+    private static void PaintTerrain(Random random, int i, int x, int y, int z, int index, int[] blocks)
+    { 
         if (i > 0)
         {
-            if (y >= Generation.SCALE - Generation.random.Next(60, 75))
+            if (y >= Generation.SCALE - random.Next(60, 75))
             {
                 blocks[index] = Block.SNOW;
             }
 
-            else if (y >= Generation.SCALE - Generation.random.Next(90, 100) || Block.GetSlopeOfBlock(x, y, z, blocks) >= 2.5f) { blocks[index] = Block.STONE; }
+            else if (y >= Generation.SCALE - random.Next(90, 100) || Block.GetSlopeOfBlock(x, y, z, blocks) >= 2.5f) { blocks[index] = Block.STONE; }
 
-            else if (y > (Generation.WATER_LEVEL + Generation.BEACH_HEIGHT) - Generation.random.Next(1, 3))
+            else if (y > (Generation.WATER_LEVEL + Generation.BEACH_HEIGHT) - random.Next(1, 3))
             {
                 if (blocks[Chunk.GetFlatIndex(x, y + 1, z)] == 0) { blocks[index] = Block.GRASS; }
                 else { blocks[index] = Block.DIRT; }

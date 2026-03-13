@@ -18,14 +18,15 @@ public class Chunk
     public static int Height { get; set; }
 
 
-    public GameObject obj;
-    public GameObject water;
+    public GameObject chunkObj;
+    public GameObject waterObj;
 
-    private static readonly Material mat = Resources.Load<Material>("ChunkMaterial");
-    private static readonly Material waterMat = Resources.Load<Material>("WaterMaterial");
+    public static readonly Material mat = Resources.Load<Material>("ChunkMaterial");
+    public static readonly Material waterMat = Resources.Load<Material>("WaterMaterial");
 
-    public Task generationTask;
+    public bool isGenerating;
     public bool isMeshing = false;
+    public readonly object _lock = new object();
 
     public Mesher mesher;
     public MeshValues terrainMeshValues;
@@ -51,6 +52,9 @@ public class Chunk
             tris = new List<int>(),
             UVs = new List<Vector2>()
         };
+
+        CreateObj(ref chunkObj, null, "Chunk", mat);
+        CreateObj(ref waterObj, chunkObj.transform, "Water", waterMat);
     }
 
     [DllImport("VoxelEngine_v2", EntryPoint = "GenerateChunkValues")]
@@ -62,26 +66,6 @@ public class Chunk
 
     public void Generate()
     {
-        obj = new GameObject("Chunk");
-        obj.transform.position = pos;
-        obj.AddComponent<MeshCollider>();
-        obj.AddComponent<MeshFilter>();
-        obj.AddComponent<MeshRenderer>();
-        obj.GetComponent<Renderer>().material = mat;
-
-
-        // INITIALIZE WATER SUB-CHUNK
-        water = new GameObject("Water");
-        water.transform.position = pos;
-        water.AddComponent<MeshCollider>();
-        water.AddComponent<MeshFilter>();
-        water.AddComponent<MeshRenderer>();
-        water.GetComponent<Renderer>().material = waterMat;
-
-
-        water.transform.parent = obj.transform;
-
-
         float[] continentalness = Generation.continentalness;
         float[] heightFromContinentalness = Generation.heightFromContinentalness;
 
@@ -99,16 +83,11 @@ public class Chunk
             Marshal.Copy(ptr, blocks, 0, size);
             DeleteChunkValues(ptr);
 
-            Task.Run(() =>
-            {
-                TerrainPainter.Paint(blocks);
+            TerrainPainter.Paint(blocks);
 
-                startMeshGen();
-
-                foreach(var n in GetChunkNeigbors())
-                {
-                    n?.startMeshGen();
-                }
+            this.startMeshGen();
+            Parallel.ForEach(GetChunkNeigbors(), n => {
+                n?.startMeshGen();
             });
         }
         catch(Exception e)
@@ -122,33 +101,51 @@ public class Chunk
         }
     }
 
+    public void CreateObj(ref GameObject obj, Transform parent, string name, Material mat)
+    {
+        obj = new GameObject("Chunk");
+        obj.transform.position = pos;
+        obj.AddComponent<MeshCollider>();
+        obj.AddComponent<MeshFilter>();
+        obj.AddComponent<MeshRenderer>();
+        obj.GetComponent<Renderer>().material = mat;
+
+        if(parent != null)
+            obj.transform.parent = parent;
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void startMeshGen()
     {
         if (isMeshing) return;
 
         // We don't return if busyChunks contains our current chunk becuase that will cause holes
-        if(!busyChunks.Contains(this)) busyChunks.Add(this);
+        if (!busyChunks.Contains(this)) busyChunks.Add(this);
 
-        generationTask = Task.Run(() => 
+        // This lock is non-static
+        // This chunk can not call this code when it is called from a seperate method
+        lock (_lock)
         {
+            isGenerating = true;
             mesher.GenerateMeshValues();
             mesher.GenerateMeshValuesWater();
-        });
+            isGenerating = false;
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Meshify()
     {
         isMeshing = true;
-        Mesher.Meshify(obj, terrainMeshValues);
-        Mesher.Meshify(water, waterMeshValues);
+
+        Mesher.Meshify(chunkObj, terrainMeshValues);
+        Mesher.Meshify(waterObj, waterMeshValues);
         
         busyChunks.Remove(this);
         isMeshing = false;
     }
 
-    //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private Chunk[] GetChunkNeigbors()
     {
         Generation.chunkDictionary.TryGetValue(new Vector3Int(pos.x + Width, pos.y, pos.z), out Chunk rightChunk);
