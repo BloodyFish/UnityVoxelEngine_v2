@@ -15,8 +15,6 @@ Unity Voxel Engine v2 is an experimental voxel engine that separates responsibil
 
 This repository serves as a technical demonstration of Unity-to-native code interoperability and voxel engine experimentation.
 
-_There is a bug with threading, I am working on fixing it ASAP_
-
 ---
 
 ## 📋 Current Features
