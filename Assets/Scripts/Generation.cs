@@ -13,7 +13,9 @@ public class Generation : MonoBehaviour
     public static int BEACH_HEIGHT = 3;
     public const int SCALE = 320;
 
-    public static int seed = 77777777;
+    [SerializeField] bool randomizeSeed;
+    [SerializeField] int seedInput = 77777777;
+    public static int seed;
 
     public static Dictionary<Vector3, Chunk> chunkDictionary = new Dictionary<Vector3, Chunk>();
 
@@ -50,10 +52,15 @@ public class Generation : MonoBehaviour
         List<Block> possibleBlocks_list = Resources.LoadAll<Block>("Blocks").ToList();
         possibleBlocks_list.Sort(new BlockComparer());
         Block.possibleBlocks = possibleBlocks_list.ToArray();
+
+        if (randomizeSeed) seed = (int)(Random.value * int.MaxValue);
+        else seed = seedInput;
     }
 
     void Start()
     {
+        print("Seed: " + seed);
+
         Chunk.Width = 16;
         Chunk.Length = 16;
         Chunk.Height = 384;
@@ -97,7 +104,6 @@ public class Generation : MonoBehaviour
                     yield return null;
                 }
             }
-
             yield return null;
 
         }
