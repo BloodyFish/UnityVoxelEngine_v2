@@ -13,7 +13,7 @@ A voxel engine prototype built in **Unity** using a hybrid **C# and C++ architec
 
 Unity Voxel Engine v2 is an experimental voxel engine that separates responsibilities between Unity scripts and native C++ code. Unity handles project structure, scripting, and engine integration, while performance-sensitive logic is implemented in a compiled native library.
 
-This repository serves as a technical demonstration of Unity-to-native code interoperability and voxel engine experimentation.
+Please veiw the [set-up guide](https://github.com/BloodyFish/UnityVoxelEngine_v2/wiki) for more information on how to get started using the world generator.
 
 ---
 
