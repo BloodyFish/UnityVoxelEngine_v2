@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace BloodyFish.UnityVoxelEngine.V2
+namespace BloodyFish.UnityVoxelEngine.v2
 {
     public struct MeshValues
     {

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace BloodyFish.UnityVoxelEngine.V2
+namespace BloodyFish.UnityVoxelEngine.v2
 {
     [CreateAssetMenu(menuName = "Trees/BasicTree")]
     public class BasicTree : BloodyFish.UnityVoxelEngine.V2.Tree

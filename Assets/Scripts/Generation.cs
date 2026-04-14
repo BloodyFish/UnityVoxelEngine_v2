@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace BloodyFish.UnityVoxelEngine.V2
+namespace BloodyFish.UnityVoxelEngine.v2
 {
     public class Generation : MonoBehaviour
     {

@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace BloodyFish.UnityVoxelEngine.V2
+namespace BloodyFish.UnityVoxelEngine.v2
 {
     public class TerrainPainter
     {

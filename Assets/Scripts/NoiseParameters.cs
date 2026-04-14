@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace BloodyFish.UnityVoxelEngine.V2
+namespace BloodyFish.UnityVoxelEngine.v2
 {
     [CreateAssetMenu]
     public class NoiseParameters : ScriptableObject
