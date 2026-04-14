@@ -1,10 +1,13 @@
 using UnityEngine;
 
-[CreateAssetMenu]
-public class NoiseParameters : ScriptableObject
+namespace BloodyFish.UnityVoxelEngine.V2
 {
-    public float frequency;
-    public int octaves;
-    public float lacunarity;
-    public float gain;
+    [CreateAssetMenu]
+    public class NoiseParameters : ScriptableObject
+    {
+        public float frequency;
+        public int octaves;
+        public float lacunarity;
+        public float gain;
+    }
 }

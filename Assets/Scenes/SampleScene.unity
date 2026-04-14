@@ -150,7 +150,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Generation
   noise2DParam: {fileID: 11400000, guid: fb81674c188347645b353f7a059f8085, type: 2}
   noise3DParam: {fileID: 11400000, guid: c1aece3c99ea4e043b0a43c02ffde138, type: 2}
-  randomizeSeed: 1
+  randomizeSeed: 0
   seedInput: 77777777
 --- !u!4 &116216381
 Transform:
