@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4d46532c31ac7004daad140866c2ca94, type: 3}
-  m_Name: Stone
+  m_Name: Oak Wood
   m_EditorClassIdentifier: Assembly-CSharp::Block
-  blockName: Stone
-  blockID: 1
+  blockName: Oak Wood
+  blockID: 6
   tint:
     serializedVersion: 2
     rgba: 16777215
-  texCoord_front: {x: 1, y: 15}
-  texCoord_back: {x: 1, y: 15}
-  texCoord_left: {x: 1, y: 15}
-  texCoord_right: {x: 1, y: 15}
-  texCoord_top: {x: 1, y: 15}
-  texCoord_bottom: {x: 1, y: 15}
+  texCoord_front: {x: 4, y: 14}
+  texCoord_back: {x: 4, y: 14}
+  texCoord_left: {x: 4, y: 14}
+  texCoord_right: {x: 4, y: 14}
+  texCoord_top: {x: 5, y: 14}
+  texCoord_bottom: {x: 5, y: 14}
   canGrowTree: 0

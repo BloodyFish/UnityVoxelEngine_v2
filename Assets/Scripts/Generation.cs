@@ -19,6 +19,9 @@ public class Generation : MonoBehaviour
 
     public static Dictionary<Vector3, Chunk> chunkDictionary = new Dictionary<Vector3, Chunk>();
 
+    // FOR TESTING
+    public static Tree defaultTree;
+
     [DllImport("VoxelEngine_v2", EntryPoint = "NoiseInit_2D")]
     public static extern void NoiseInit_2D(int seed, float frequency, int octaves, float lacunarity, float gain);
 
@@ -70,6 +73,8 @@ public class Generation : MonoBehaviour
 
         StartCoroutine(GenerateChunk());
         StartCoroutine(MeshChunks());
+
+        defaultTree = Resources.Load<Tree>("Trees/BasicTree");
     }
 
 

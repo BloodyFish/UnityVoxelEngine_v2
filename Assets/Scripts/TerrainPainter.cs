@@ -3,11 +3,10 @@ using System.Runtime.CompilerServices;
 
 public class TerrainPainter
 {
-    public static void Paint(int[] blocks)
+    public static void Paint(int[] blocks, Random random)
     {
         // Since .NET 4.8 doesn't support the thread safe version of System.Random (System.Random.Shared)
         // we have to make a new Random for every thread
-        Random random = new Random(Generation.seed);
 
         int index = 0;
         foreach (var i in blocks)
@@ -36,7 +35,7 @@ public class TerrainPainter
 
             else if (y > (Generation.WATER_LEVEL + Generation.BEACH_HEIGHT) - random.Next(1, 3))
             {
-                if (blocks[Chunk.GetFlatIndex(x, y + 1, z)] == 0) { blocks[index] = Block.GRASS; }
+                if (blocks[Block.GetFlatIndex(x, y + 1, z)] == 0) { blocks[index] = Block.GRASS; }
                 else { blocks[index] = Block.DIRT; }
             }
 

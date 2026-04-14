@@ -14,9 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Block
   blockName: Sand
   blockID: 4
+  tint:
+    serializedVersion: 2
+    rgba: 16777215
   texCoord_front: {x: 2, y: 14}
   texCoord_back: {x: 2, y: 14}
   texCoord_left: {x: 2, y: 14}
   texCoord_right: {x: 2, y: 14}
   texCoord_top: {x: 2, y: 14}
   texCoord_bottom: {x: 2, y: 14}
+  canGrowTree: 0

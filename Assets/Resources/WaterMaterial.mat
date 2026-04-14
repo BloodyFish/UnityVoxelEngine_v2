@@ -58,8 +58,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _AnimLen: 64
     - _QueueControl: 0
     - _QueueOffset: 0
+    - _animLen: 32
     m_Colors: []
   m_BuildTextureStacks: []
   m_AllowLocking: 1

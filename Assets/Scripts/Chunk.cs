@@ -43,14 +43,16 @@ public class Chunk
         {
             verts = new List<Vector3>(),
             tris = new List<int>(),
-            UVs = new List<Vector2>()
+            UVs = new List<Vector2>(),
+            colors = new List<Color32>()
         };
 
         waterMeshValues = new MeshValues()
         {
             verts = new List<Vector3>(),
             tris = new List<int>(),
-            UVs = new List<Vector2>()
+            UVs = new List<Vector2>(),
+            colors = new List<Color32>()
         };
 
         CreateObj(ref chunkObj, null, "Chunk", mat);
@@ -83,7 +85,9 @@ public class Chunk
             Marshal.Copy(ptr, blocks, 0, size);
             DeleteChunkValues(ptr);
 
-            TerrainPainter.Paint(blocks);
+            System.Random random = new System.Random(Generation.seed);
+            TerrainPainter.Paint(blocks, random);
+            TreeGenerator.PlantTrees(Generation.defaultTree, blocks, random);
 
             this.startMeshGen();
             Parallel.ForEach(GetChunkNeigbors(), n => {
@@ -155,13 +159,5 @@ public class Chunk
 
         Chunk[] neighbors = {rightChunk, leftChunk, frontChunk, backChunk};
         return neighbors;
-    }
-
-    // Tells the compiler to inline this method
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int GetFlatIndex(int x, int y, int z)
-    {
-        int i = x + (z * Width) + (y * Width * Length);
-        return i;
     }
 }

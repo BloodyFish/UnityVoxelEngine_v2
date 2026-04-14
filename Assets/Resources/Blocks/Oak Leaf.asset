@@ -10,17 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4d46532c31ac7004daad140866c2ca94, type: 3}
-  m_Name: Stone
+  m_Name: Oak Leaf
   m_EditorClassIdentifier: Assembly-CSharp::Block
-  blockName: Stone
-  blockID: 1
+  blockName: Oak Leaf
+  blockID: 7
   tint:
     serializedVersion: 2
-    rgba: 16777215
-  texCoord_front: {x: 1, y: 15}
-  texCoord_back: {x: 1, y: 15}
-  texCoord_left: {x: 1, y: 15}
-  texCoord_right: {x: 1, y: 15}
-  texCoord_top: {x: 1, y: 15}
-  texCoord_bottom: {x: 1, y: 15}
+    rgba: 4281119876
+  texCoord_front: {x: 4, y: 3}
+  texCoord_back: {x: 4, y: 3}
+  texCoord_left: {x: 4, y: 3}
+  texCoord_right: {x: 4, y: 3}
+  texCoord_top: {x: 4, y: 3}
+  texCoord_bottom: {x: 4, y: 3}
+  isTransparent: 1
   canGrowTree: 0

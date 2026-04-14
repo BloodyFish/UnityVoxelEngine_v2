@@ -79,4 +79,14 @@ public class Voxel_Verts
         verts.Add(new Vector3(0.5f + x, -0.5f + y, -0.5f + z));
         verts.Add(new Vector3(0.5f + x, -0.5f + y, 0.5f + z));
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void AddVertexColor(List<Color32> colors, Color32 color)
+    {
+        // Add a color for each vertex in a face (4)
+        for(int i = 0; i < 4; i++)
+        {
+            colors.Add(color);
+        }
+    }
 }

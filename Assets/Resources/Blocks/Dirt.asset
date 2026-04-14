@@ -14,9 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Block
   blockName: Dirt
   blockID: 2
+  tint:
+    serializedVersion: 2
+    rgba: 16777215
   texCoord_front: {x: 2, y: 15}
   texCoord_back: {x: 2, y: 15}
   texCoord_left: {x: 2, y: 15}
   texCoord_right: {x: 2, y: 15}
   texCoord_top: {x: 2, y: 15}
   texCoord_bottom: {x: 2, y: 15}
+  canGrowTree: 1
