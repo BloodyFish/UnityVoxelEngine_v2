@@ -3,7 +3,7 @@ using UnityEngine;
 namespace BloodyFish.UnityVoxelEngine.v2
 {
     [CreateAssetMenu(menuName = "Trees/BasicTree")]
-    public class BasicTree : BloodyFish.UnityVoxelEngine.V2.Tree
+    public class BasicTree : BloodyFish.UnityVoxelEngine.v2.Tree
     {
         public override void GenerateCanopy(Vector3Int pos, int[] blocks, System.Random random)
         {
