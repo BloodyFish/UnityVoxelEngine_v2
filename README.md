@@ -3,7 +3,8 @@
 ![C#](https://img.shields.io/badge/C%23-10.7%25-green)
 ![C](https://img.shields.io/badge/C-0.2%25-gray)
 
-<img width="2560" height="1288" alt="image" src="https://github.com/user-attachments/assets/352e42f0-9368-4f69-bf50-59fd36a2e6ff" />
+<img width="2559" height="1290" alt="Screenshot 2026-04-18 222951" src="https://github.com/user-attachments/assets/3fe62bcc-1b6d-43d4-ab0f-cd969a4a64ac" />
+
 
 A voxel engine prototype built in **Unity** using a hybrid **C# and C++ architecture**. The project demonstrates integration between Unity and a native DLL for voxel-related processing.
 
