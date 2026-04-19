@@ -1,8 +1,4 @@
 # Unity Voxel Engine v2
-![C++](https://img.shields.io/badge/C%2B%2B-89.1%25-blue)
-![C#](https://img.shields.io/badge/C%23-10.7%25-green)
-![C](https://img.shields.io/badge/C-0.2%25-gray)
-
 <img width="2559" height="1290" alt="Screenshot 2026-04-18 222951" src="https://github.com/user-attachments/assets/3fe62bcc-1b6d-43d4-ab0f-cd969a4a64ac" />
 
 
