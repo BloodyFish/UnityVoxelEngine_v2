@@ -2,7 +2,7 @@
 <img width="2559" height="1290" alt="Screenshot 2026-04-18 222951" src="https://github.com/user-attachments/assets/3fe62bcc-1b6d-43d4-ab0f-cd969a4a64ac" />
 
 
-A voxel engine prototype built in **Unity** using a hybrid **C# and C++ architecture**. The project demonstrates integration between Unity and a native DLL for voxel-related processing.
+A voxel engine prototype built in **Unity** using C#.
 
 ---
 
