@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -61,33 +60,35 @@ namespace BloodyFish.UnityVoxelEngine.v2
             CreateObj(ref waterObj, chunkObj.transform, "Water", waterMat);
         }
 
-        [DllImport("VoxelEngine_v2", EntryPoint = "GenerateChunkValues")]
+        /*[DllImport("VoxelEngine_v2", EntryPoint = "GenerateChunkValues")]
         public static extern IntPtr GenerateChunkValues(int width, int length, int height, int yOffset, int xPos, int zPos, IntPtr continentalness, IntPtr heightFromContinentalness, int splineLength);
 
         [DllImport("VoxelEngine_v2", EntryPoint = "DeleteChunkValues")]
-        public static extern void DeleteChunkValues(IntPtr ptr);
+        public static extern void DeleteChunkValues(IntPtr ptr);*/
 
 
         public void Generate()
         {
-            float[] continentalness = Generation.continentalness;
-            float[] heightFromContinentalness = Generation.heightFromContinentalness;
+            //float[] continentalness = Generation.continentalness;
+            //float[] heightFromContinentalness = Generation.continentalness;
 
-            GCHandle continentalnessHandle = GCHandle.Alloc(continentalness, GCHandleType.Pinned);
-            GCHandle heightFromContinentalnessHandle = GCHandle.Alloc(heightFromContinentalness, GCHandleType.Pinned);
+            //GCHandle continentalnessHandle = GCHandle.Alloc(continentalness, GCHandleType.Pinned);
+            //GCHandle heightFromContinentalnessHandle = GCHandle.Alloc(heightFromContinentalness, GCHandleType.Pinned);
 
-            try
-            {
-                IntPtr continentalnessPointer = continentalnessHandle.AddrOfPinnedObject();
-                IntPtr heightFromContinentalnessPointer = heightFromContinentalnessHandle.AddrOfPinnedObject();
+            //try
+            //{
+                //IntPtr continentalnessPointer = continentalnessHandle.AddrOfPinnedObject();
+                //IntPtr heightFromContinentalnessPointer = heightFromContinentalnessHandle.AddrOfPinnedObject();
 
                 int size = Width * Length * Height;
-                IntPtr ptr = GenerateChunkValues(Width, Length, Height, 0, pos.x, pos.z, continentalnessPointer, heightFromContinentalnessPointer, continentalness.Length);
+                //IntPtr ptr = GenerateChunkValues(Width, Length, Height, 0, pos.x, pos.z, continentalnessPointer, heightFromContinentalnessPointer, continentalness.Length);
+                GenerateChunkValues(0, pos.x, pos.z, Generation.continentalness, Generation.heightFromContinentalness, Generation.continentalness.Length);
 
-                Marshal.Copy(ptr, blocks, 0, size);
-                DeleteChunkValues(ptr);
+                //Marshal.Copy(ptr, blocks, 0, size);
+                //DeleteChunkValues(ptr);
 
                 System.Random random = new System.Random(Generation.seed);
+                
                 TerrainPainter.Paint(blocks, random);
                 TreeGenerator.PlantTrees(Generation.defaultTree, blocks, random);
 
@@ -95,15 +96,66 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 Parallel.ForEach(GetChunkNeigbors(), n => {
                     n?.startMeshGen();
                 });
-            }
-            catch (Exception e)
+            //}
+            //catch (Exception e)
+            //{
+                //Debug.Log(e);
+            //}
+            //finally
+            //{
+                //if (continentalnessHandle.IsAllocated) { continentalnessHandle.Free(); }
+                //if (heightFromContinentalnessHandle.IsAllocated) { heightFromContinentalnessHandle.Free(); }
+            //}
+        }
+
+        private void GenerateChunkValues(int yOffset, int xPos, int zPos, float[] continentalness, float[] heightFromContinentalness, int splineLength)
+        {
+            for (int x = 0; x < Chunk.Width; x++)
             {
-                Debug.Log(e);
-            }
-            finally
-            {
-                if (continentalnessHandle.IsAllocated) { continentalnessHandle.Free(); }
-                if (heightFromContinentalnessHandle.IsAllocated) { heightFromContinentalnessHandle.Free(); }
+                for (int z = 0; z < Chunk.Length; z++)
+                {
+
+                    float noiseX = x + xPos;
+                    float noiseZ = z + zPos;
+
+                    float noiseVal_2D = Noise.noise2D.GetNoise(noiseX, noiseZ);
+
+                    // Get the length of our continentalness to height spline
+
+                    float h = 0;
+                    for (int i = 0; i < splineLength - 1; i++)
+                    {
+                        if (noiseVal_2D >= continentalness[i] && noiseVal_2D <= continentalness[i + 1])
+                        {
+                            // Create equation for this certain section of the spline:
+                            float x1 = continentalness[i];
+                            float x2 = continentalness[i + 1];
+                            float y1 = heightFromContinentalness[i];
+                            float y2 = heightFromContinentalness[i + 1];
+
+                            // y = mx + b
+                            // b = y - mx
+
+                            float slope = (y2 - y1) / (x2 - x1);
+                            float b = y1 - slope * x1;
+
+                            h = slope * noiseVal_2D + b;
+                        }
+                    }
+
+
+                    for (int y = 0; y < h + yOffset; y++)
+                    {
+                        float noiseVal_3D = Noise.noise3D.GetNoise(noiseX, (float)y, noiseZ);
+
+                        int i = x + (z * Chunk.Width) + (y * Chunk.Width * Chunk.Length);
+
+                        if (noiseVal_3D > 0)
+                        {
+                            blocks[i] = 1;
+                        }
+                    }
+                }
             }
         }
 
