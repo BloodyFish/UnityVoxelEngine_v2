@@ -3,7 +3,8 @@
 ![C#](https://img.shields.io/badge/C%23-10.7%25-green)
 ![C](https://img.shields.io/badge/C-0.2%25-gray)
 
-<img width="2560" height="1288" alt="image" src="https://github.com/user-attachments/assets/352e42f0-9368-4f69-bf50-59fd36a2e6ff" />
+<img width="2559" height="1290" alt="Screenshot 2026-04-18 222951" src="https://github.com/user-attachments/assets/3fe62bcc-1b6d-43d4-ab0f-cd969a4a64ac" />
+
 
 A voxel engine prototype built in **Unity** using a hybrid **C# and C++ architecture**. The project demonstrates integration between Unity and a native DLL for voxel-related processing.
 
@@ -20,8 +21,6 @@ Please veiw the [set-up guide](https://github.com/BloodyFish/UnityVoxelEngine_v2
 ## 📋 Current Features
 
 - Unity project configured for voxel engine development  
-- Native **C++ DLL integration** (`VoxelEngine_v2.dll`)  
-- Supporting C++ source project included  
 - Organized Unity project structure  
 - Functional foundation for voxel engine experimentation  
 
@@ -35,8 +34,6 @@ UnityVoxelEngine_v2
 ├── Assets/                # Unity scripts, scenes, and resources
 ├── Packages/              # Unity package dependencies
 ├── ProjectSettings/       # Unity configuration files
-├── VoxelEngine_v2/        # Native C++ source project
-├── VoxelEngine_v2.dll     # Compiled native library used by Unity
 ├── README.md
 ├── LICENSE
 ├── .gitignore
@@ -54,26 +51,14 @@ Responsible for:
 - Engine integration  
 - Project management  
 - Script execution  
-- Communication with the native DLL
 - Chunk **mesh** generation 
-
-### Native Library (C++)
-
-Responsible for:
-
-- Voxel-related processing implemented outside of Unity  
-- Performance-focused logic compiled into a DLL
-- Chunk **noise** generation
-
-Unity scripts interface with the native library to execute voxel processing tasks.
 
 ---
 
 ## 🤔 Requirements
 
 - Unity (Version compatible with project settings)  
-- Visual Studio or another C# development environment  
-- Visual Studio with C++ workload (if modifying the native project)  
+- Visual Studio or another C# development environment
 
 ---
 
@@ -94,24 +79,11 @@ git clone https://github.com/BloodyFish/UnityVoxelEngine_v2.git
 
 ---
 
-## 📚 Native DLL
-
-The project includes a prebuilt native library:
-
-```
-VoxelEngine_v2.dll
-```
-
-If you modify the C++ source project, rebuild the DLL and replace the existing file inside the Unity project directory.
-
----
-
 ## 🔬 Purpose of the Project
 
 This project is intended as:
 
 - A voxel engine for Unity  
-- A demonstration of Unity and native C++ interoperability  
 - A foundation for voxel based games  
 
 ---
