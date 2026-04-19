@@ -24,13 +24,6 @@ namespace BloodyFish.UnityVoxelEngine.v2
         // FOR TESTING
         public static Tree defaultTree;
 
-        /*[DllImport("VoxelEngine_v2", EntryPoint = "NoiseInit_2D")]
-        public static extern void NoiseInit_2D(int seed, float frequency, int octaves, float lacunarity, float gain);
-
-        [DllImport("VoxelEngine_v2", EntryPoint = "NoiseInit_3D")]
-        public static extern void NoiseInit_3D(int seed, float frequency, int octaves, float lacunarity, float gain);*/
-
-
         private static Dictionary<float, float> continentalnessToHeight = new Dictionary<float, float>()
         {
             // Negative continentalness values will map to ocean and beach heights
@@ -69,9 +62,6 @@ namespace BloodyFish.UnityVoxelEngine.v2
             Chunk.Width = 16;
             Chunk.Length = 16;
             Chunk.Height = 384;
-
-            //NoiseInit_2D(seed, noise2DParam.frequency / 1000, noise2DParam.octaves, noise2DParam.lacunarity, noise2DParam.gain);
-            //NoiseInit_3D(seed, noise3DParam.frequency / 1000, noise3DParam.octaves, noise3DParam.lacunarity, noise3DParam.gain);
 
             Noise.Init2D(seed, noise2DParam.frequency / 1000, noise2DParam.octaves, noise2DParam.lacunarity, noise2DParam.gain);
             Noise.Init3D(seed, noise3DParam.frequency / 1000, noise3DParam.octaves, noise3DParam.lacunarity, noise3DParam.gain);

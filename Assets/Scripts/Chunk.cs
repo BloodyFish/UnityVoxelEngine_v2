@@ -60,52 +60,20 @@ namespace BloodyFish.UnityVoxelEngine.v2
             CreateObj(ref waterObj, chunkObj.transform, "Water", waterMat);
         }
 
-        /*[DllImport("VoxelEngine_v2", EntryPoint = "GenerateChunkValues")]
-        public static extern IntPtr GenerateChunkValues(int width, int length, int height, int yOffset, int xPos, int zPos, IntPtr continentalness, IntPtr heightFromContinentalness, int splineLength);
-
-        [DllImport("VoxelEngine_v2", EntryPoint = "DeleteChunkValues")]
-        public static extern void DeleteChunkValues(IntPtr ptr);*/
-
-
         public void Generate()
         {
-            //float[] continentalness = Generation.continentalness;
-            //float[] heightFromContinentalness = Generation.continentalness;
+            int size = Width * Length * Height;
+            GenerateChunkValues(0, pos.x, pos.z, Generation.continentalness, Generation.heightFromContinentalness, Generation.continentalness.Length);
 
-            //GCHandle continentalnessHandle = GCHandle.Alloc(continentalness, GCHandleType.Pinned);
-            //GCHandle heightFromContinentalnessHandle = GCHandle.Alloc(heightFromContinentalness, GCHandleType.Pinned);
+            System.Random random = new System.Random(Generation.seed);
 
-            //try
-            //{
-                //IntPtr continentalnessPointer = continentalnessHandle.AddrOfPinnedObject();
-                //IntPtr heightFromContinentalnessPointer = heightFromContinentalnessHandle.AddrOfPinnedObject();
+            TerrainPainter.Paint(blocks, random);
+            TreeGenerator.PlantTrees(Generation.defaultTree, blocks, random);
 
-                int size = Width * Length * Height;
-                //IntPtr ptr = GenerateChunkValues(Width, Length, Height, 0, pos.x, pos.z, continentalnessPointer, heightFromContinentalnessPointer, continentalness.Length);
-                GenerateChunkValues(0, pos.x, pos.z, Generation.continentalness, Generation.heightFromContinentalness, Generation.continentalness.Length);
-
-                //Marshal.Copy(ptr, blocks, 0, size);
-                //DeleteChunkValues(ptr);
-
-                System.Random random = new System.Random(Generation.seed);
-                
-                TerrainPainter.Paint(blocks, random);
-                TreeGenerator.PlantTrees(Generation.defaultTree, blocks, random);
-
-                this.startMeshGen();
-                Parallel.ForEach(GetChunkNeigbors(), n => {
-                    n?.startMeshGen();
-                });
-            //}
-            //catch (Exception e)
-            //{
-                //Debug.Log(e);
-            //}
-            //finally
-            //{
-                //if (continentalnessHandle.IsAllocated) { continentalnessHandle.Free(); }
-                //if (heightFromContinentalnessHandle.IsAllocated) { heightFromContinentalnessHandle.Free(); }
-            //}
+            this.startMeshGen();
+            Parallel.ForEach(GetChunkNeigbors(), n => {
+                n?.startMeshGen();
+            });
         }
 
         private void GenerateChunkValues(int yOffset, int xPos, int zPos, float[] continentalness, float[] heightFromContinentalness, int splineLength)
