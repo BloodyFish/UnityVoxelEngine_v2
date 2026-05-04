@@ -1,8 +1,8 @@
 # Unity Voxel Engine v2
-<img width="2559" height="1290" alt="Screenshot 2026-04-18 222951" src="https://github.com/user-attachments/assets/3fe62bcc-1b6d-43d4-ab0f-cd969a4a64ac" />
+<img width="2558" height="1286" alt="image" src="https://github.com/user-attachments/assets/56d16ffe-4cc9-411d-9f55-ed599e525bc9" />
 
-
-A voxel engine prototype built in **Unity** using C#.
+<br>
+A voxel engine prototype built in Unity using C#.
 
 ---
 
