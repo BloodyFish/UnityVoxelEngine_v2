@@ -23,4 +23,5 @@ MonoBehaviour:
   texCoord_right: {x: 4, y: 14}
   texCoord_top: {x: 5, y: 14}
   texCoord_bottom: {x: 5, y: 14}
+  isTransparent: 0
   canGrowTree: 0

@@ -5,7 +5,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
     [CreateAssetMenu(menuName = "Trees/BasicTree")]
     public class BasicTree : BloodyFish.UnityVoxelEngine.v2.Tree
     {
-        public override void GenerateCanopy(Vector3Int pos, int[] blocks, System.Random random)
+        public override void GenerateCanopy(Vector3Int pos, Chunk chunk, int[] blocks, System.Random random)
         {
             int canopyHeight = random.Next(minCanopyHeight, maxCanopyHeight + 1);
 
@@ -30,10 +30,13 @@ namespace BloodyFish.UnityVoxelEngine.v2
                         int m_y = y + pos.y;
                         int m_z = z + pos.z;
 
-                        if (m_x < 0 || m_x >= Chunk.Width || m_z < 0 || m_z >= Chunk.Length || m_y >= Chunk.Height) continue;
+                        //if (m_x < 0 || m_x >= Chunk.Width || m_z < 0 || m_z >= Chunk.Length || m_y >= Chunk.Height) continue;
+                        if (m_y >= Chunk.Height) continue;
 
-                        int index = Block.GetFlatIndex(m_x, m_y, m_z);
-                        if (blocks[index] == 0) blocks[index] = leafBlock.blockID;
+                        if (chunk.GetBlock(m_x, m_y, m_z) == 0)
+                        {
+                            chunk.SetBlock(leafBlock.blockID, m_x, m_y, m_z);
+                        }
                     }
                 }
             }

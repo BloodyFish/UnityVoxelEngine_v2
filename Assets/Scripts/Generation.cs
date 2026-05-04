@@ -1,7 +1,8 @@
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -16,10 +17,14 @@ namespace BloodyFish.UnityVoxelEngine.v2
         public const int SCALE = 320;
 
         [SerializeField] bool randomizeSeed;
-        [SerializeField] int seedInput = 77777777;
+        [SerializeField] int seedInput;
         public static int seed;
 
-        public static Dictionary<Vector3, Chunk> chunkDictionary = new Dictionary<Vector3, Chunk>();
+        public static ConcurrentDictionary<Vector3, Chunk> chunkDictionary = new ConcurrentDictionary<Vector3, Chunk>();
+        public static ConcurrentDictionary<Vector3, int[]> bufferDictionary = new ConcurrentDictionary<Vector3, int[]>();
+
+        public static SemaphoreSlim semaphore;
+
 
         // FOR TESTING
         public static Tree defaultTree;
@@ -57,6 +62,9 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
         void Start()
         {
+            // Restrict the amount of threads to be between 4 and 8
+            semaphore = new SemaphoreSlim(Mathf.Clamp(SystemInfo.processorCount / 2, 4, 8));
+
             print("Seed: " + seed);
 
             Chunk.Width = 16;
@@ -74,16 +82,25 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
         IEnumerator GenerateChunk()
         {
-            for (int x = 0; x < 32; x++)
+            for (int x = 0; x < 64; x++)
             {
-                for (int z = 0; z < 32; z++)
+                for (int z = 0; z < 64; z++)
                 {
-                    Chunk chunk = new Chunk(new Vector3Int(x * 16, 0, z * 16));
-                    chunkDictionary.Add(new Vector3Int(x * 16, 0, z * 16), chunk);
+                    Vector3Int pos = new Vector3Int(x * Chunk.Width, 0, z * Chunk.Length);
+                    Chunk chunk = new Chunk(pos);
+
+                    semaphore.Wait();
 
                     Task.Run(() =>
                     {
-                        chunk.Generate();
+                        try
+                        {
+                            chunk.Generate();
+                        }
+                        finally
+                        {
+                            semaphore.Release();
+                        }
                     });
 
                     yield return null;
@@ -97,7 +114,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
             {
                 foreach (Chunk chunk in Chunk.busyChunks.ToList())
                 {
-                    if (!chunk.isGenerating && !chunk.isMeshing)
+                    if (chunk.generationPhase == Chunk.GenerationPhase.OPEN_FOR_MESH_GEN)
                     {
                         chunk.Meshify();
                         yield return null;

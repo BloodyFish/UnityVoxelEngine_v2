@@ -5,10 +5,8 @@ namespace BloodyFish.UnityVoxelEngine.v2
 {
     public class TerrainPainter
     {
-        public static void Paint(int[] blocks, Random random)
+        public static void Paint(Chunk chunk, int[] blocks, Random random)
         {
-            // Since .NET 4.8 doesn't support the thread safe version of System.Random (System.Random.Shared)
-            // we have to make a new Random for every thread
 
             int index = 0;
             foreach (var i in blocks)
@@ -17,43 +15,45 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 int z = (index / Chunk.Width) % Chunk.Length;
                 int y = (index / (Chunk.Width * Chunk.Length)) % Chunk.Height;
 
-                PaintTerrain(random, i, x, y, z, index, blocks);
-                FillWater(i, y, index, blocks);
+                PaintTerrain(random, i, x, y, z, blocks, chunk);
+                FillWater(i, x, y, z, chunk);
 
                 index++;
             }
         }
 
-        private static void PaintTerrain(Random random, int i, int x, int y, int z, int index, int[] blocks)
+        private static void PaintTerrain(Random random, int i, int x, int y, int z, int[] blocks, Chunk chunk)
         {
             if (i > 0)
             {
                 if (y >= Generation.SCALE - random.Next(60, 75))
                 {
-                    blocks[index] = Block.SNOW;
+                    chunk.SetBlock(Block.SNOW, x, y, z);
                 }
 
-                else if (y >= Generation.SCALE - random.Next(90, 100) || Block.GetSlopeOfBlock(x, y, z, blocks) >= 2.5f) { blocks[index] = Block.STONE; }
+                //else if (y >= Generation.SCALE - random.Next(90, 100) || Block.GetSlopeOfBlock(x, y, z, chunk) >= 1f) { Block.SetBlock(Block.STONE, x, y, z, chunk); }
+                else if (y >= Generation.SCALE - random.Next(90, 100)){ chunk.SetBlock(Block.STONE, x, y, z); }
 
                 else if (y > (Generation.WATER_LEVEL + Generation.BEACH_HEIGHT) - random.Next(1, 3))
                 {
-                    if (blocks[Block.GetFlatIndex(x, y + 1, z)] == 0) { blocks[index] = Block.GRASS; }
-                    else { blocks[index] = Block.DIRT; }
+                    if (chunk.GetBlock(x, y + 1, z) == 0) { chunk.SetBlock(Block.GRASS, x, y, z); }
+                    else { chunk.SetBlock(Block.DIRT, x, y, z); }
                 }
 
                 else
                 {
-                    blocks[index] = Block.SAND;
+                    chunk.SetBlock(Block.SAND, x, y, z);
                 }
+
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void FillWater(int i, int y, int index, int[] blocks)
+        private static void FillWater(int i, int x, int y, int z, Chunk chunk)
         {
             if (y <= Generation.WATER_LEVEL && i == 0)
             {
-                blocks[index] = -1;
+               chunk.SetBlock(-1, x, y, z);
             }
         }
     }
