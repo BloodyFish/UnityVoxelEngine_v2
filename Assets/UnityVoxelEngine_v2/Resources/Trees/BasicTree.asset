@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7111ecfda2df9845b322381795e2761, type: 3}
+  m_Name: BasicTree
+  m_EditorClassIdentifier: Assembly-CSharp::BasicTree
+  trunkBlock: {fileID: 11400000, guid: c73ed7b58c7f7a74eb2185e94ff6a9f4, type: 2}
+  leafBlock: {fileID: 11400000, guid: 4e70cfb554fb9384e9c600649551a625, type: 2}
+  minHeight: 4
+  maxHeight: 7
+  canopyOverhang: 2
+  minCanopyHeight: 5
+  maxCanopyHeight: 7

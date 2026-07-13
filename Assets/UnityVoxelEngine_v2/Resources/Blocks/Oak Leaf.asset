@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d46532c31ac7004daad140866c2ca94, type: 3}
+  m_Name: Oak Leaf
+  m_EditorClassIdentifier: Assembly-CSharp::Block
+  blockName: Oak Leaf
+  blockID: 7
+  tint:
+    serializedVersion: 2
+    rgba: 4281297749
+  texCoord_front: {x: 4, y: 12}
+  texCoord_back: {x: 4, y: 12}
+  texCoord_left: {x: 4, y: 12}
+  texCoord_right: {x: 4, y: 12}
+  texCoord_top: {x: 4, y: 12}
+  texCoord_bottom: {x: 4, y: 12}
+  isTransparent: 1
+  canGrowTree: 0
