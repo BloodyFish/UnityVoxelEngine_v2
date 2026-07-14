@@ -116,7 +116,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
             Unity.Mathematics.Random random = new Unity.Mathematics.Random((uint)seed);
             seedOffset = random.NextFloat3(new float3(-999999, -999999, -999999), new float3(999999, 999999, 999999));
-            print(seedOffset);
+            //print(seedOffset);
         }
 
         private void Awake()
@@ -243,11 +243,6 @@ namespace BloodyFish.UnityVoxelEngine.v2
         {
             chunkQueue.Clear();
 
-            // Clearing Chunk.busyChunks is important becuase when moving the player large distances, whats in this Queue takes priority
-            //Chunk.busyChunks.Clear();
-
-            //chunkQueue.Enqueue(currentChunkPos);
-
             while (true)
             {
                 if(chunkQueue.Count == 0)
@@ -324,16 +319,16 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
                     if(chunkDictionary.TryGetValue(chunkPos, out ChunkValues chunk))
                     {
+                        Chunk.busyChunks.TryDequeue(out chunkPos);
                         if (CalculateIfInCameraFrustrum(Chunk.FindChunkCenter(chunkPos)) && chunk.generationPhase == GenerationPhase.OPEN_FOR_MESH_GEN)
                         {
-                            Chunk.busyChunks.TryDequeue(out chunkPos);
                             Chunk.Meshify(ref chunk);
+                            
+                            yield return null;
+                            continue;
                         }
-                        else
-                        {
-                            Chunk.busyChunks.TryDequeue(out chunkPos);
-                            Chunk.busyChunks.Enqueue(chunkPos);
-                        }
+    
+                        Chunk.busyChunks.Enqueue(chunkPos);
                     }
                 }
                 yield return null;

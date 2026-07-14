@@ -34,7 +34,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
         }
 
         [BurstCompile]
-        public static JobHandle GenTerrain(int2 chunkPos, ref NativeArray<short> blocks, ref Unity.Mathematics.Random random, out GenerateChunkValuesJob generationJob)
+        public static JobHandle GenTerrain(int2 worldSpaceChunkPos, ref NativeArray<short> blocks, ref Unity.Mathematics.Random random, out GenerateChunkValuesJob generationJob)
         {
             generationJob = new GenerateChunkValuesJob()
             {
@@ -42,8 +42,8 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 continentalness = GenerationManager.continentalness,
                 heightFromContinentalness = GenerationManager.heightFromContinentalness,
                 yOffset = 0,
-                xPos = chunkPos.x * ChunkValues.WIDTH,
-                zPos = chunkPos.y * ChunkValues.LENGTH,
+                xPos = worldSpaceChunkPos.x,
+                zPos = worldSpaceChunkPos.y,
 
                 seedOffset = GenerationManager.seedOffset
             };

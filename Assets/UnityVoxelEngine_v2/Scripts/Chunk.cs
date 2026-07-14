@@ -34,6 +34,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
         public NativeArray<short> blocks;
         public int2 pos;
+        public int2 worldSpacePos;
         
         public GenerationPhase generationPhase;
         public Unity.Mathematics.Random random;
@@ -82,6 +83,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
             ChunkValues chunkVals = new ChunkValues();
             chunkVals.blocks = new NativeArray<short>(ChunkValues.WIDTH * ChunkValues.LENGTH * ChunkValues.HEIGHT, Allocator.Persistent);
             chunkVals.pos = pos;
+            chunkVals.worldSpacePos = new int2(pos.x * ChunkValues.WIDTH, pos.y * ChunkValues.LENGTH);
 
             chunkVals.generationPhase = GenerationPhase.IDLE;
             
@@ -152,7 +154,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
             chunkVals.random = new Unity.Mathematics.Random((uint)(GenerationManager.seed ^ pos.x ^ pos.y * int.MaxValue));
             chunkVals.generationPhase = GenerationPhase.IS_GEN_TERRAIN;
 
-            JobHandle generationJobHandle = Generation.GenTerrain(pos, ref chunkVals.blocks, ref chunkVals.random, out GenerateChunkValuesJob generationJob);
+            JobHandle generationJobHandle = Generation.GenTerrain(chunkVals.worldSpacePos, ref chunkVals.blocks, ref chunkVals.random, out GenerateChunkValuesJob generationJob);
             JobHandle paintJobHandle = TerrainPainter.Paint(pos, ref chunkVals.blocks, ref chunkVals.random, generationJobHandle, out TerrainPaintJob paintJob);
             JobHandle treeGenJobHandle = TreeGenerator.PlantTrees(pos, ref chunkVals.blocks, ref chunkVals.random, paintJobHandle, out TreeGenJob treeGenJob);
 
@@ -168,6 +170,8 @@ namespace BloodyFish.UnityVoxelEngine.v2
             NativeList<ChunkValues> chunks = new NativeList<ChunkValues>(0, Allocator.TempJob);
 
 
+            NativeArray<int2> busyChunksArray = busyChunks.ToArray(Allocator.Temp);
+
             // Cycle through possible neighbors and add them to "chunks"
             // NOTE: one of the offsets is int(0, 0) whihc includes the current chunk
             for (int i = 0; i < offsets.Length; i++)
@@ -178,19 +182,24 @@ namespace BloodyFish.UnityVoxelEngine.v2
                     MergeBlockBuffer(ref neighbor);
                     GenerationManager.chunkDictionary[neighbor.pos] = neighbor;
                     chunks.Add(neighbor);
+
+                    if(!busyChunksArray.Contains(neighbor.pos))
+                    {
+                        busyChunks.Enqueue(neighbor.pos);
+                    }
                 }   
             }
             
             // Start mesh gen for "chunks"
             JobHandle meshGenHandle = Generation.StartMeshGen(ref chunks, paintJobHandle);
 
-            for(int i = 0; i < chunks.Length; i++)
+            /*for(int i = 0; i < chunks.Length; i++)
             {
                 ChunkValues chunk = chunks[i];
                 if (!busyChunks.ToArray(Allocator.Temp).Contains(chunk.pos)){
                     busyChunks.Enqueue(chunk.pos);
                 }
-            }
+            } */
 
             // Dispose "chunks" when done
             meshGenHandle.Complete(); 
