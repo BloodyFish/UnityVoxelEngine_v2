@@ -68,12 +68,8 @@ MonoBehaviour:
   m_Name: OutlineFeatureLite
   m_EditorClassIdentifier: Assembly-CSharp::AtanOutlineLite.OutlineFeatureLite
   m_Active: 1
-  settings: {outlineMaterial: {fileID: 2100000, guid: c43747a81326f0f49b7d35c6ed7cfc2f, type: 2}, normalThreshold: 0.2, outlineSize: 2, outlineColor:
-      r: 0
-      g: 0
-      b: 0
-      a: 1
-}
+  settings: {outlineMaterial: {fileID: 2100000, guid: c43747a81326f0f49b7d35c6ed7cfc2f, type: 2}, normalThreshold: 0.2, outlineSize: 2, outlineColor: r: 0 g: 0 b: 0 a: 1}
+
 --- !u!114 &7833122117494664109
 MonoBehaviour:
   m_ObjectHideFlags: 0
