@@ -226,16 +226,17 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
         private void OnDrawGizmos()
         {
+            Vector3 size = new Vector3(ChunkValues.WIDTH, ChunkValues.HEIGHT, ChunkValues.LENGTH);
+
             Gizmos.color = Color.red;
 
-            Gizmos.DrawWireCube(Chunk.FindChunkCenter(currentChunkPos), new Vector3(ChunkValues.WIDTH, ChunkValues.HEIGHT, ChunkValues.LENGTH));
+            Gizmos.DrawWireCube(Chunk.FindChunkCenter(currentChunkPos), size);
 
             Gizmos.color = Color.blue;
 
             foreach(int2 chunkPos in chunkQueue)
             {
-                Gizmos.DrawWireCube(Chunk.FindChunkCenter(chunkPos), new Vector3(ChunkValues.WIDTH, ChunkValues.HEIGHT, ChunkValues.LENGTH));
-
+                Gizmos.DrawWireCube(Chunk.FindChunkCenter(chunkPos), size);
             }
         }
 

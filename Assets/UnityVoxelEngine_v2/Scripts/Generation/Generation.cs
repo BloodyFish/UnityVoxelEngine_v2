@@ -8,7 +8,7 @@ using Unity.Mathematics;
 namespace BloodyFish.UnityVoxelEngine.v2
 {
     public class Generation
-    {   
+    {    
         [BurstCompile]
         public static JobHandle StartMeshGen(ref NativeList<ChunkValues> chunkValsArray, JobHandle dependency)
         {
@@ -26,7 +26,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
             {
                 ChunkValues chunkVals = chunkValsArray[i];
                 chunkVals.generationPhase = GenerationPhase.OPEN_FOR_MESH_GEN;
-
+ 
                 GenerationManager.chunkDictionary[chunkVals.pos] = chunkVals;
             }
 
@@ -75,14 +75,17 @@ namespace BloodyFish.UnityVoxelEngine.v2
         {
             int splineLength = continentalness.Length;
 
+            float xOffset = xPos + seedOffset.x;
+            float zOffset = zPos + seedOffset.z;
+
 
             for (int index = 0; index < ChunkValues.WIDTH * ChunkValues.LENGTH; index++)
             {
                 int x = index % ChunkValues.WIDTH;
                 int z = index / ChunkValues.WIDTH;
 
-                float noiseX = x + xPos + seedOffset.x;
-                float noiseZ = z + zPos + seedOffset.z;
+                float noiseX = x + xOffset;
+                float noiseZ = z + zOffset;
 
                 float noiseVal_2D = 0;
                 float frequency = 0.5f;
