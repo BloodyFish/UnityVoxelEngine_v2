@@ -24,9 +24,10 @@ namespace BloodyFish.UnityVoxelEngine.v2
         [SerializeField] Transform player;
         public int2 currentChunkPos;
 
-        [SerializeField] NoiseParameters noise2DParam;
-        [SerializeField] NoiseParameters noise3DParam; // unused... for now
-        [SerializeField] NoiseParameters caveNoiseParam;
+        public NoiseParameters noise2DParam;
+
+        public  NoiseParameters noise3DParam; // unused... for now
+        public NoiseParameters caveNoiseParam;
 
         [SerializeField] bool randomizeSeed;
         [SerializeField] int seedInput;

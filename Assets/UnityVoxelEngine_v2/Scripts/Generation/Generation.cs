@@ -45,7 +45,9 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 xPos = worldSpaceChunkPos.x,
                 zPos = worldSpaceChunkPos.y,
 
-                seedOffset = GenerationManager.seedOffset
+                seedOffset = GenerationManager.seedOffset,
+                noise2D = GenerationManager.instance.noise2DParam,
+                noise3D = GenerationManager.instance.noise3DParam
             };
 
             JobHandle generationJobHandle = generationJob.Schedule();
@@ -71,6 +73,12 @@ namespace BloodyFish.UnityVoxelEngine.v2
         [ReadOnly]
         public float3 seedOffset;
 
+        [ReadOnly]
+        public NoiseParameters noise2D;
+
+        [ReadOnly]
+        public NoiseParameters noise3D;
+
         public void Execute()
         {
             int splineLength = continentalness.Length;
@@ -87,22 +95,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 float noiseX = x + xOffset;
                 float noiseZ = z + zOffset;
 
-                float noiseVal_2D = 0;
-                float frequency = 0.5f;
-                float lacunarity = 3.5f;
-                float octaves = 5;
-                float amplitude = 1;
-                float gain = 0.25f;
-
-                float maxAmplitude = 0;
-                for (int i = 0; i < octaves; i++)
-                {
-                    noiseVal_2D += Unity.Mathematics.noise.snoise(new float2(noiseX, noiseZ) * (frequency / 1000)) * amplitude;
-                    maxAmplitude += amplitude;
-                    frequency *= lacunarity;
-                    amplitude *= gain;
-                }
-                noiseVal_2D /= maxAmplitude;
+                float noiseVal_2D = NoiseGen.GetNoise(noiseX, noiseZ, noise2D);
 
                 // Get the length of our continentalness to height spline
 
@@ -131,8 +124,12 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
                 for (int y = 0; y < h + yOffset; y++)
                 {
-                    int i = Block.GetFlatIndex(x, y, z);
-                    blocks[i] = 1;
+                    float noiseVal_3D = NoiseGen.GetNoise(noiseX, y + seedOffset.y, noiseZ, noise3D);
+                    if(noiseVal_3D > 0f)
+                    {
+                        int i = Block.GetFlatIndex(x, y, z);
+                        blocks[i] = 1;
+                    }
                 }
             }
         }

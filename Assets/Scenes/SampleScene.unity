@@ -152,9 +152,21 @@ MonoBehaviour:
   currentChunkPos:
     x: 0
     y: 0
-  noise2DParam: {fileID: 11400000, guid: fb81674c188347645b353f7a059f8085, type: 2}
-  noise3DParam: {fileID: 11400000, guid: c1aece3c99ea4e043b0a43c02ffde138, type: 2}
-  caveNoiseParam: {fileID: 11400000, guid: 6c7371bcfd0434947abbe524ec8261c5, type: 2}
+  noise2DParam:
+    frequency: 0.5
+    octaves: 5
+    lacunarity: 3.5
+    gain: 0.25
+  noise3DParam:
+    frequency: 0.5
+    octaves: 5
+    lacunarity: 3.5
+    gain: 0.25
+  caveNoiseParam:
+    frequency: 0
+    octaves: 0
+    lacunarity: 0
+    gain: 0
   randomizeSeed: 0
   seedInput: 672049728
   renderDistance: 32
