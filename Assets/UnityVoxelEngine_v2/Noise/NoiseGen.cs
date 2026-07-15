@@ -1,7 +1,5 @@
-using UnityEngine;
 using Unity.Mathematics;
 using Unity.Burst;
-
 
 namespace BloodyFish.UnityVoxelEngine.v2
 {
@@ -40,6 +38,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
             return noiseVal;
         }
 
+        [BurstCompile]
         public static float GetNoise(float noiseX, float noiseY, float noiseZ, NoiseParameters noiseParams)
         {
             float noiseVal = 0;
