@@ -72,6 +72,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
         };
 
         // FindChunkCenter uses the relatibve position of the chunk not teh actuial one (i.e (0, 0), (1, 0))
+        [BurstCompile]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 FindChunkCenter(int2 chunkPos)
         {
@@ -168,8 +169,6 @@ namespace BloodyFish.UnityVoxelEngine.v2
             GenerationManager.chunkDictionary[pos] = chunkVals;
 
             NativeList<ChunkValues> chunks = new NativeList<ChunkValues>(0, Allocator.TempJob);
-
-
             NativeArray<int2> busyChunksArray = busyChunks.ToArray(Allocator.Temp);
 
             // Cycle through possible neighbors and add them to "chunks"
@@ -215,9 +214,11 @@ namespace BloodyFish.UnityVoxelEngine.v2
             {
                 for (int i = 0; i < chunkVals.blocks.Length; i++)
                 {
-                    if (chunkVals.blocks[i] == 0 && blockBuffer.blocks[i] != 0)
+                    short bufferBlockID = blockBuffer.blocks[i];
+                    
+                    if (chunkVals.blocks[i] == 0 && bufferBlockID != 0)
                     {
-                        chunkVals.blocks[i] = blockBuffer.blocks[i];
+                        chunkVals.blocks[i] = bufferBlockID;
                     }
                 }
 
@@ -233,16 +234,9 @@ namespace BloodyFish.UnityVoxelEngine.v2
             NativeParallelHashMap<int2, ChunkValues> chunkDictionary)
         {
             GetBlocksRelativeChunk(chunkPos, blockPos, ref blocks, bufferDictionary, chunkDictionary);
+            blockPos = GetRelativeCoordinates(blockPos);
 
-            int newX = blockPos.x;
-            int newZ = blockPos.z;
-            if (blockPos.x >= 0) newX = blockPos.x % ChunkValues.WIDTH;
-            if (blockPos.z >= 0) newZ = blockPos.z % ChunkValues.LENGTH;
-
-            if (blockPos.x < 0) newX = ChunkValues.WIDTH + blockPos.x;
-            if (blockPos.z < 0) newZ = ChunkValues.LENGTH + blockPos.z;
-
-            blocks[Block.GetFlatIndex(newX, blockPos.y, newZ)] = blockID;
+            blocks[Block.GetFlatIndex(blockPos.x, blockPos.y, blockPos.z)] = blockID;
         }
 
         [BurstCompile]
@@ -253,15 +247,9 @@ namespace BloodyFish.UnityVoxelEngine.v2
             NativeParallelHashMap<int2, ChunkValues> chunkDictionary)
         {
             GetBlocksRelativeChunk(chunkPos, blockPos, ref blocks, bufferDictionary, chunkDictionary);
-            int newX = blockPos.x;
-            int newZ = blockPos.z;
-            if (blockPos.x >= 0) newX = blockPos.x % ChunkValues.WIDTH;
-            if (blockPos.z >= 0) newZ = blockPos.z % ChunkValues.LENGTH;
+            blockPos = GetRelativeCoordinates(blockPos);
 
-            if (blockPos.x < 0) newX = ChunkValues.WIDTH + blockPos.x;
-            if (blockPos.z < 0) newZ = ChunkValues.LENGTH + blockPos.z;
-
-            return blocks[Block.GetFlatIndex(newX, blockPos.y, newZ)];
+            return blocks[Block.GetFlatIndex(blockPos.x, blockPos.y, blockPos.z)];
         }
 
         // The only reason we use the ref keyword here is so that we can assign using "="
@@ -298,6 +286,22 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
         [BurstCompile]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int3 GetRelativeCoordinates(int3 blockPos)
+        {
+            int newX = blockPos.x;
+            int newZ = blockPos.z;
+            if (blockPos.x >= 0) newX = blockPos.x % ChunkValues.WIDTH;
+            if (blockPos.z >= 0) newZ = blockPos.z % ChunkValues.LENGTH;
+
+            if (blockPos.x < 0) newX = ChunkValues.WIDTH + blockPos.x;
+            if (blockPos.z < 0) newZ = ChunkValues.LENGTH + blockPos.z;
+
+            return new int3(newX, blockPos.y, newZ);
+        }
+
+
+        [BurstCompile]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetChunkCollsions(int2 chunkPos, bool isActive)
         {
             foreach (int2 offset in offsets)
@@ -321,22 +325,6 @@ namespace BloodyFish.UnityVoxelEngine.v2
             Mesher.Meshify(chunkObj.transform.GetChild(0).gameObject, chunkVals.waterMeshValues);
 
             chunkVals.generationPhase = GenerationPhase.IDLE;
-        }
-
-
-        [BurstCompile]
-        [MethodImpl (MethodImplOptions.AggressiveInlining)]
-        public static bool BusyChunkContains(int2 chunkPos)
-        {
-            for (int i = 0; i < Chunk.busyChunks.Count; i++)
-            {
-                if (Chunk.busyChunks.Peek().Equals(chunkPos))
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
     }
 }

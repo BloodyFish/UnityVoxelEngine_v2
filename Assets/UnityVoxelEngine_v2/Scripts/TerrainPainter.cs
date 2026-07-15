@@ -35,7 +35,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
             NativeParallelHashMap<int2, BlockBufferValues> bufferDictionary,
             NativeParallelHashMap<int2, ChunkValues> chunkDictionary)
         {
-            // We only want 
+
             if (i > 0)
             {
                 // We only want non-stone on the top 3 layers (with variation, of course)
