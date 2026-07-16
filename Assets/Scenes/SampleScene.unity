@@ -163,10 +163,10 @@ MonoBehaviour:
     lacunarity: 3.5
     gain: 0.25
   caveNoiseParam:
-    frequency: 0
-    octaves: 0
-    lacunarity: 0
-    gain: 0
+    frequency: 25
+    octaves: 2
+    lacunarity: 3.5
+    gain: 0.25
   randomizeSeed: 0
   seedInput: 672049728
   renderDistance: 32

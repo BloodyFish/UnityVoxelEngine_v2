@@ -1,8 +1,10 @@
+using System.Diagnostics;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
+using UnityEngine.InputSystem.Interactions;
 
 
 namespace BloodyFish.UnityVoxelEngine.v2
@@ -47,7 +49,8 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
                 seedOffset = GenerationManager.seedOffset,
                 noise2D = GenerationManager.instance.noise2DParam,
-                noise3D = GenerationManager.instance.noise3DParam
+                noise3D = GenerationManager.instance.noise3DParam,
+                caveNoise = GenerationManager.instance.caveNoiseParam
             };
 
             JobHandle generationJobHandle = generationJob.Schedule();
@@ -74,10 +77,8 @@ namespace BloodyFish.UnityVoxelEngine.v2
         public float3 seedOffset;
 
         [ReadOnly]
-        public NoiseParameters noise2D;
+        public NoiseParameters noise2D, noise3D, caveNoise;
 
-        [ReadOnly]
-        public NoiseParameters noise3D;
 
         public void Execute()
         {
@@ -98,33 +99,13 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 float noiseVal_2D = NoiseGen.GetNoise(noiseX, noiseZ, noise2D);
 
                 // Get the length of our continentalness to height spline
+                int height = GetTerrainHeight(splineLength, continentalness, heightFromContinentalness, noiseVal_2D);
 
-                float h = 0;
-                for (int i = 0; i < splineLength - 1; i++)
-                {
-                    float x1 = continentalness[i];
-                    float x2 = continentalness[i + 1];
-
-                    if (noiseVal_2D >= x1 && noiseVal_2D <= x2)
-                    {
-                        // Create equation for this certain section of the spline:
-                        float y1 = heightFromContinentalness[i];
-                        float y2 = heightFromContinentalness[i + 1];
-
-                        // y = mx + b
-                        // b = y - mx
-
-                        float slope = (y2 - y1) / (x2 - x1);
-                        float b = y1 - slope * x1;
-
-                        h = slope * noiseVal_2D + b;
-                        break;
-                    }
-                }
-
-                for (int y = 0; y < h + yOffset; y++)
+                for (int y = 0; y < height + yOffset; y++)
                 {
                     float noiseVal_3D = NoiseGen.GetNoise(noiseX, y + seedOffset.y, noiseZ, noise3D);
+                    //float m_caveNoise = NoiseGen.GetNoise(noiseX, y + seedOffset.y, noiseZ, caveNoise);
+
                     if(noiseVal_3D > 0f)
                     {
                         int i = Block.GetFlatIndex(x, y, z);
@@ -133,7 +114,40 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 }
             }
         }
+
+
+        // This method MUST be inside the job or else Burst complains
+        // This is a seperate method for readability, no other reason
+        private static int GetTerrainHeight(int splineLength, NativeArray<float> continentalness,  NativeArray<float> heightFromContinentalness, float noiseVal_2D)
+        {   
+            int h = 0;
+            for (int i = 0; i < splineLength - 1; i++)
+            {
+                float x1 = continentalness[i];
+                float x2 = continentalness[i + 1];
+
+                if (noiseVal_2D >= x1 && noiseVal_2D <= x2)
+                {
+                    // Create equation for this certain section of the spline:
+                    float y1 = heightFromContinentalness[i];
+                    float y2 = heightFromContinentalness[i + 1];
+
+                    // y = mx + b
+                    // b = y - mx
+
+                    float slope = (y2 - y1) / (x2 - x1);
+                    float b = y1 - slope * x1;
+
+                    h = (int)(slope * noiseVal_2D + b);
+                    break;
+                }
+            }
+
+            return h;
+        }
+
     }
+
 
     [BurstCompile]
     struct StartMeshGenJob : IJobParallelFor
