@@ -10,7 +10,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
     public class TerrainPainter
     {
         [BurstCompile]
-        public static JobHandle Paint(int2 chunkPos, ref NativeArray<short> blocks, ref Unity.Mathematics.Random random, JobHandle dependency, out TerrainPaintJob paintJob)
+        public static JobHandle Paint(int2 worldSpaceChunkPos, int2 chunkPos, ref NativeArray<short> blocks, ref Unity.Mathematics.Random random, JobHandle dependency, out TerrainPaintJob paintJob)
         {
             paintJob = new TerrainPaintJob()
             {
@@ -18,7 +18,15 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 chunkDictionary = GenerationManager.chunkDictionary,
                 bufferDictionary = GenerationManager.bufferDictionary,
                 random = random,
-                chunkPos = chunkPos
+                chunkPos = chunkPos,
+                biomeParams = GenerationManager.biomeParams,
+
+                xPos = worldSpaceChunkPos.x,
+                zPos = worldSpaceChunkPos.y,
+                seedOffset = GenerationManager.seedOffset,
+
+                temperatureNoiseParam = GenerationManager.instance.temperatureNoiseParam,
+                precipationNoiseParam = GenerationManager.instance.perciptationNoiseParam
 
             };
 
@@ -32,6 +40,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
         [BurstCompile]
         public static void PaintTerrain(ref Unity.Mathematics.Random random, int i, int2 chunkPos, int3 blockPos, 
             ref NativeArray<short> blocks,
+            BiomeParameters biomeParam,
             NativeParallelHashMap<int2, BlockBufferValues> bufferDictionary,
             NativeParallelHashMap<int2, ChunkValues> chunkDictionary)
         {
@@ -43,30 +52,30 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 {
                     if (blockPos.y >= WorldGenConstants.SCALE - random.NextInt(60, 75))
                     {
-                        Chunk.SetBlock(Block.SNOW, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary);
+                        Chunk.SetBlock(biomeParam.snowBlockID, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary);
                     }
 
                     //else if (y >= Generation.SCALE - random.Next(90, 100) || Block.GetSlopeOfBlock(x, y, z, chunk) >= 1f) { Block.SetBlock(Block.STONE, x, y, z, chunk); }
                     else if (blockPos.y >= WorldGenConstants.SCALE - random.NextInt(90, 100))
                     { 
-                        Chunk.SetBlock(Block.STONE, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary); 
+                        Chunk.SetBlock(biomeParam.stoneBlockID, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary); 
                     }
 
                     else if (blockPos.y > (WorldGenConstants.WATER_LEVEL + WorldGenConstants.BEACH_HEIGHT) - random.NextInt(1, 3))
                     {
                         if (Chunk.GetBlock(chunkPos, new int3(blockPos.x, blockPos.y + 1, blockPos.z), blocks, bufferDictionary, chunkDictionary) == 0) 
                         {
-                            Chunk.SetBlock(Block.GRASS, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary); 
+                            Chunk.SetBlock(biomeParam.topBlockID, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary); 
                         }
                         else 
                         { 
-                            Chunk.SetBlock(Block.DIRT, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary); 
+                            Chunk.SetBlock(biomeParam.middleBlockID, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary); 
                         }
                     }
 
                     else
                     {
-                        Chunk.SetBlock(Block.SAND, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary);
+                        Chunk.SetBlock(biomeParam.beachBlockID, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary);
                     }
                 }
                 
@@ -107,9 +116,23 @@ namespace BloodyFish.UnityVoxelEngine.v2
         [ReadOnly]
         public int2 chunkPos;
 
+        [ReadOnly]
+        public NativeArray<BiomeParameters> biomeParams;
+        
+        [ReadOnly]
+        public int xPos, zPos;
+
+        [ReadOnly]
+        public float3 seedOffset;
+
+        [ReadOnly]
+        public NoiseParameters temperatureNoiseParam, precipationNoiseParam;
+
 
         public void Execute()
         {
+            float xOffset = xPos + seedOffset.x;
+            float zOffset = zPos + seedOffset.z;
 
             for(int i  = 0; i < blocks.Length; i++)
             {
@@ -117,11 +140,29 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 int z = (i / ChunkValues.WIDTH) % ChunkValues.LENGTH;
                 int y = (i / (ChunkValues.WIDTH * ChunkValues.LENGTH)) % ChunkValues.HEIGHT;
 
+                float noiseX = x + xOffset;
+                float noiseZ = z + zOffset;
+
+                float temperatureNoise = Biome.AdjustBiomeNoiseVal(NoiseGen.GetNoise(noiseX, noiseZ, temperatureNoiseParam), -15, 35);
+                float precipitationNoise = Biome.AdjustBiomeNoiseVal(NoiseGen.GetNoise(noiseX, noiseZ, precipationNoiseParam), -15, 35);
+
+                BiomeParameters biome = biomeParams[0];
+                foreach(BiomeParameters biomeParam in biomeParams)
+                {
+                    if((temperatureNoise >= biomeParam.minTemp && temperatureNoise <= biomeParam.maxTemp)
+                    && (precipitationNoise >= biomeParam.minPreciptation && precipitationNoise <= biomeParam.maxPreciptation))
+                    {
+                        biome = biomeParam;
+                        break;
+                    }
+                }
+
+                // The ID of the current, unpainted block
                 short id = blocks[i];
 
                 int3 blockPos = new int3(x, y, z);
 
-                TerrainPainter.PaintTerrain(ref random, id, chunkPos, blockPos, ref blocks, bufferDictionary, chunkDictionary);
+                TerrainPainter.PaintTerrain(ref random, id, chunkPos, blockPos, ref blocks, biome, bufferDictionary, chunkDictionary);
                 TerrainPainter.FillWater(id, chunkPos, blockPos, ref blocks, bufferDictionary, chunkDictionary);
             }
 

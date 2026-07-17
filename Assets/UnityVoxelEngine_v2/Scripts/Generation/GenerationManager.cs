@@ -28,10 +28,17 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
         public  NoiseParameters noise3DParam; // unused... for now
         public NoiseParameters caveNoiseParam;
+        public NoiseParameters temperatureNoiseParam;
+        public NoiseParameters perciptationNoiseParam;
+
+        public List<Biome> biomes;
+        public static NativeArray<BiomeParameters> biomeParams;
+        [SerializeField] Block defaultStoneBlock;
 
         [SerializeField] bool randomizeSeed;
         [SerializeField] int seedInput;
-        [SerializeField] int renderDistance;
+        [SerializeField] int renderDistance; // Render Distance in chunks
+        private int blockRenderDistance;
         public static int seed;
         public static float3 seedOffset;
 
@@ -76,19 +83,28 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
         private void OnEnable()
         {
+            // Make the default Stone block have the blockID of 1
+            // Since all blocks are set as 1 during the first step of generation, this makes it so that all blocks will be Stone at first
+            defaultStoneBlock.blockID = 1;
+
             // In order to get the correct texture, we need to get all the possible blocks out of the Resources folder
-            // The blocks in possibleBlocks should be sorted by their blockID.
-            // So a block with blockID 1 should be at index 0, a block with blockID 2 should be at index 1, and so on.
             List<Block> possibleBlocks_list = Resources.LoadAll<Block>("Blocks").ToList();
-            possibleBlocks_list.Sort(new BlockComparer());
+
+            // Make sure Stone is the first block in the block list
+            possibleBlocks_list.Remove(defaultStoneBlock);
+            possibleBlocks_list.Insert(0, defaultStoneBlock);
 
             // We convert the list we just created into a NativeArray<BlockData> so that Job System can be utilized
             Block.possibleBlocks = new NativeArray<BlockData>(possibleBlocks_list.Count, Allocator.Persistent);
+
             for (int i = 0; i < possibleBlocks_list.Count; i++)
             {
+                short ID = (short)(i + 1);
+                possibleBlocks_list[i].blockID = ID;
+
                 BlockData blockData = new BlockData
                 {
-                    blockID = possibleBlocks_list[i].blockID,
+                    blockID = ID,
                     tint = possibleBlocks_list[i].tint,
                     texCoord_front = possibleBlocks_list[i].texCoord_front,
                     texCoord_back = possibleBlocks_list[i].texCoord_back,
@@ -103,6 +119,14 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 Block.possibleBlocks[i] = blockData;
             }
             possibleBlocks_list.Clear();
+
+            // Create a NativeArray of structs that represent our biomes
+            biomeParams = new NativeArray<BiomeParameters>(biomes.Count, Allocator.Persistent);
+            for(int i = 0; i < biomes.Count; i++)
+            {
+                biomeParams[i] = Biome.CreateNewBiomeParameter(biomes[i]);
+            }
+
 
             if (randomizeSeed) seed = (int)(UnityEngine.Random.value * int.MaxValue);
             else seed = seedInput;
@@ -134,7 +158,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
             defaultTree = Resources.Load<Tree>("Trees/BasicTree");
 
 
-            renderDistance = renderDistance * ChunkValues.WIDTH;
+            blockRenderDistance = renderDistance * ChunkValues.WIDTH;
 
             generateChunkCoroutine = StartCoroutine(GenerateChunk());
             StartCoroutine(MeshChunks());
@@ -162,7 +186,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
             foreach (int2 chunkPos in chunkObjectDictionary.Keys.ToList())
             {
                 Vector2Int chunkPosVector2 = new Vector2Int(chunkPos.x * ChunkValues.WIDTH, chunkPos.y * ChunkValues.LENGTH);
-                if (Vector2.Distance(chunkPosVector2, new Vector2(player.position.x, player.position.z)) > renderDistance)
+                if (Vector2.Distance(chunkPosVector2, new Vector2(player.position.x, player.position.z)) > blockRenderDistance)
                 {
                     Destroy(chunkObjectDictionary[chunkPos]);
                     chunkObjectDictionary.Remove(chunkPos);
@@ -191,7 +215,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
             for(int i = 0; i < Chunk.busyChunks.Count; i++)
             {
                 int2 chunkPos = Chunk.busyChunks.Peek();
-                if(Vector2.Distance(new Vector2Int(chunkPos.x * ChunkValues.WIDTH, chunkPos.y * ChunkValues.WIDTH), new Vector2(player.position.x, player.position.z)) > renderDistance)
+                if(Vector2.Distance(new Vector2Int(chunkPos.x * ChunkValues.WIDTH, chunkPos.y * ChunkValues.WIDTH), new Vector2(player.position.x, player.position.z)) > blockRenderDistance)
                 {
                     Chunk.busyChunks.Dequeue();
                 }
@@ -258,7 +282,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 // Even though we did all these checks in GetValidMembers, we need to check again here because the player may have moved since the chunk was added to the queue
                 if (!chunkDictionary.ContainsKey(chunkPos) 
                     && CalculateIfInCameraFrustrum(Chunk.FindChunkCenter(chunkPos))
-                    && Vector2.Distance(new Vector2(chunkPos.x * ChunkValues.WIDTH, chunkPos.y * ChunkValues.LENGTH), playerPos) <= renderDistance)
+                    && Vector2.Distance(new Vector2(chunkPos.x * ChunkValues.WIDTH, chunkPos.y * ChunkValues.LENGTH), playerPos) <= blockRenderDistance)
                 {
                     // Create the chunk and generate it
                     ChunkValues chunk = Chunk.CreateChunk(chunkPos);
@@ -289,7 +313,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
                     }*/
 
                     if (!CalculateIfInCameraFrustrum(Chunk.FindChunkCenter(potentialNeighborPos))
-                    || Vector2.Distance(new Vector2(potentialNeighborPos.x * ChunkValues.WIDTH, potentialNeighborPos.y * ChunkValues.LENGTH), playerPos) > renderDistance)
+                    || Vector2.Distance(new Vector2(potentialNeighborPos.x * ChunkValues.WIDTH, potentialNeighborPos.y * ChunkValues.LENGTH), playerPos) > blockRenderDistance)
                     {
                         isValid = false;
                         break;

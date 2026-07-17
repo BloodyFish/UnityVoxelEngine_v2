@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 266e9a3eb455341909b5a6c005ae695f, type: 3}
+  m_Name: Grassland
+  m_EditorClassIdentifier: Assembly-CSharp::BloodyFish.UnityVoxelEngine.Biome
+  topBlock: {fileID: 11400000, guid: 0a774d5ad9e1a574c9f547b9aacf1270, type: 2}
+  middleBlock: {fileID: 11400000, guid: d05ab836b1639264681ec6e90fa8ec8b, type: 2}
+  stoneBlock: {fileID: 11400000, guid: 2da916ac88fe1e942bee5f7bae517afb, type: 2}
+  snowBlock: {fileID: 11400000, guid: 8d43b45e84b43bc48b608f2e0d69baae, type: 2}
+  beachBlock: {fileID: 11400000, guid: 28e330f2ff05ac34ea43888430caab44, type: 2}
+  minTemp: -10
+  maxTemp: 15
+  minPreciptation: 0
+  maxPreciptation: 50

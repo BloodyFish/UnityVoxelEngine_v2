@@ -46,7 +46,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
         // Use a struct to hold a representation of each block so that it works with Job System
         [HideInInspector] public static NativeArray<BlockData> possibleBlocks;
 
-        // One Biomes are added, this method won't be used any more
+        // Once Biomes are added, this method won't be used any more
         [HideInInspector] public const short STONE = 1;
         [HideInInspector] public const short DIRT = 2;
         [HideInInspector] public const short GRASS = 3;
@@ -109,7 +109,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
         }
     }
 
-    public class BlockComparer : IComparer<Block>
+    /*public class BlockComparer : IComparer<Block>
     {
         public int Compare(Block x, Block y)
         {
@@ -117,5 +117,5 @@ namespace BloodyFish.UnityVoxelEngine.v2
             if (x.blockID < y.blockID) return -1;
             return 0;
         }
-    }
+    }*/
 }

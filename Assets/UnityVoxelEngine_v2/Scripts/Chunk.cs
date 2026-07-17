@@ -156,7 +156,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
             chunkVals.generationPhase = GenerationPhase.IS_GEN_TERRAIN;
 
             JobHandle generationJobHandle = Generation.GenTerrain(chunkVals.worldSpacePos, ref chunkVals.blocks, ref chunkVals.random, out GenerateChunkValuesJob generationJob);
-            JobHandle paintJobHandle = TerrainPainter.Paint(pos, ref chunkVals.blocks, ref chunkVals.random, generationJobHandle, out TerrainPaintJob paintJob);
+            JobHandle paintJobHandle = TerrainPainter.Paint(chunkVals.worldSpacePos, pos, ref chunkVals.blocks, ref chunkVals.random, generationJobHandle, out TerrainPaintJob paintJob);
             JobHandle treeGenJobHandle = TreeGenerator.PlantTrees(pos, ref chunkVals.blocks, ref chunkVals.random, paintJobHandle, out TreeGenJob treeGenJob);
 
             generationJobHandle.Complete();
