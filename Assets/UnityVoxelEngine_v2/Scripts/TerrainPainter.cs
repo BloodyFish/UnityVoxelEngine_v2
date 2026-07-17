@@ -31,7 +31,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
             };
 
             // NOTE: It is NOT a good idea to make the terrain paint job an IJobParallelFor. It will cause race conditions and lots of errors.
-            JobHandle paintJobHandle = paintJob.Schedule(dependency);
+            JobHandle paintJobHandle = paintJob.ScheduleParallel(blocks.Length, GenerationManager.GetGoodBatchSize(blocks.Length), dependency);
             return paintJobHandle;
         }
 
@@ -99,8 +99,9 @@ namespace BloodyFish.UnityVoxelEngine.v2
     // NOTE: It is NOT a good idea to make the terrain paint job an IJobParallelFor. It will cause race conditions and lots of errors.
 
     [BurstCompile]
-    public struct TerrainPaintJob : IJob
+    public struct TerrainPaintJob : IJobParallelForBatch
     {
+        [NativeDisableParallelForRestriction]
         public NativeArray<short> blocks;
 
         [NativeDisableContainerSafetyRestriction]
@@ -129,33 +130,21 @@ namespace BloodyFish.UnityVoxelEngine.v2
         public NoiseParameters temperatureNoiseParam, precipationNoiseParam;
 
 
-        public void Execute()
+        public void Execute(int startIndex, int count)
         {
-            float xOffset = xPos + seedOffset.x;
-            float zOffset = zPos + seedOffset.z;
-
-            for(int i  = 0; i < blocks.Length; i++)
+            for(int i = startIndex; i < startIndex + count; i++)
             {
                 int x = i % ChunkValues.WIDTH;
                 int z = (i / ChunkValues.WIDTH) % ChunkValues.LENGTH;
                 int y = (i / (ChunkValues.WIDTH * ChunkValues.LENGTH)) % ChunkValues.HEIGHT;
 
+                float xOffset = xPos + seedOffset.x;
+                float zOffset = zPos + seedOffset.z;
+
                 float noiseX = x + xOffset;
                 float noiseZ = z + zOffset;
 
-                float temperatureNoise = Biome.AdjustBiomeNoiseVal(NoiseGen.GetNoise(noiseX, noiseZ, temperatureNoiseParam), -15, 35);
-                float precipitationNoise = Biome.AdjustBiomeNoiseVal(NoiseGen.GetNoise(noiseX, noiseZ, precipationNoiseParam), -15, 35);
-
-                BiomeParameters biome = biomeParams[0];
-                foreach(BiomeParameters biomeParam in biomeParams)
-                {
-                    if((temperatureNoise >= biomeParam.minTemp && temperatureNoise <= biomeParam.maxTemp)
-                    && (precipitationNoise >= biomeParam.minPreciptation && precipitationNoise <= biomeParam.maxPreciptation))
-                    {
-                        biome = biomeParam;
-                        break;
-                    }
-                }
+                BiomeParameters biome = Biome.GetBiome(noiseX, y + seedOffset.y, noiseZ, temperatureNoiseParam, precipationNoiseParam, biomeParams);
 
                 // The ID of the current, unpainted block
                 short id = blocks[i];
@@ -164,9 +153,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
                 TerrainPainter.PaintTerrain(ref random, id, chunkPos, blockPos, ref blocks, biome, bufferDictionary, chunkDictionary);
                 TerrainPainter.FillWater(id, chunkPos, blockPos, ref blocks, bufferDictionary, chunkDictionary);
-            }
-
-
+            }      
         }
     }
 }

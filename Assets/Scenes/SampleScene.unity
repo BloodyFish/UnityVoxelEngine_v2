@@ -168,19 +168,20 @@ MonoBehaviour:
     lacunarity: 3.5
     gain: 0.25
   temperatureNoiseParam:
-    frequency: 0.5
-    octaves: 5
+    frequency: 1
+    octaves: 2
     lacunarity: 3.5
     gain: 0.25
   perciptationNoiseParam:
-    frequency: 1
+    frequency: 2.5
     octaves: 4
     lacunarity: 3.5
     gain: 0.25
   biomes:
+  - {fileID: 11400000, guid: 42f5dabc36ce849dea6c3f43f032dd2b, type: 2}
+  - {fileID: 11400000, guid: 880a78b00b183ad40951eafa000817bf, type: 2}
   - {fileID: 11400000, guid: 989a9ec28af834e3eab1118b9cf6733e, type: 2}
   - {fileID: 11400000, guid: 176a38224e3944335be85c97c7bbc01e, type: 2}
-  - {fileID: 11400000, guid: 42f5dabc36ce849dea6c3f43f032dd2b, type: 2}
   defaultStoneBlock: {fileID: 11400000, guid: 2da916ac88fe1e942bee5f7bae517afb, type: 2}
   randomizeSeed: 0
   seedInput: 672049728

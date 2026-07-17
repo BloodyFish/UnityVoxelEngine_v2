@@ -43,9 +43,10 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 blocks = blocks,
                 continentalness = GenerationManager.continentalness,
                 heightFromContinentalness = GenerationManager.heightFromContinentalness,
+
+                xOffset = worldSpaceChunkPos.x + GenerationManager.seedOffset.x,
+                zOffset = worldSpaceChunkPos.y + GenerationManager.seedOffset.z,
                 yOffset = 0,
-                xPos = worldSpaceChunkPos.x,
-                zPos = worldSpaceChunkPos.y,
 
                 seedOffset = GenerationManager.seedOffset,
                 noise2D = GenerationManager.instance.noise2DParam,
@@ -53,15 +54,17 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 caveNoise = GenerationManager.instance.caveNoiseParam
             };
 
-            JobHandle generationJobHandle = generationJob.Schedule();
+            int size = ChunkValues.WIDTH * ChunkValues.LENGTH;
+            JobHandle generationJobHandle = generationJob.ScheduleParallel(size, GenerationManager.GetGoodBatchSize(size));
             return generationJobHandle;
         }
     }
 
     // All the generation magic happens here!
     [BurstCompile]
-    public struct GenerateChunkValuesJob : IJob
+    public struct GenerateChunkValuesJob : IJobParallelForBatch
     {
+        [NativeDisableParallelForRestriction]
         public NativeArray<short> blocks;
 
         [ReadOnly]
@@ -71,7 +74,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
         public NativeArray<float> heightFromContinentalness;
 
         [ReadOnly]
-        public int xPos, zPos, yOffset;
+        public float xOffset, yOffset, zOffset;
 
         [ReadOnly]
         public float3 seedOffset;
@@ -80,15 +83,9 @@ namespace BloodyFish.UnityVoxelEngine.v2
         public NoiseParameters noise2D, noise3D, caveNoise;
 
 
-        public void Execute()
+        public void Execute(int startIndex, int count )
         {
-            int splineLength = continentalness.Length;
-
-            float xOffset = xPos + seedOffset.x;
-            float zOffset = zPos + seedOffset.z;
-
-
-            for (int index = 0; index < ChunkValues.WIDTH * ChunkValues.LENGTH; index++)
+            for(int index = startIndex; index < startIndex + count; index++)
             {
                 int x = index % ChunkValues.WIDTH;
                 int z = index / ChunkValues.WIDTH;
@@ -99,20 +96,20 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 float noiseVal_2D = NoiseGen.GetNoise(noiseX, noiseZ, noise2D);
 
                 // Get the length of our continentalness to height spline
-                int height = GetTerrainHeight(splineLength, continentalness, heightFromContinentalness, noiseVal_2D);
+                int height = GetTerrainHeight(continentalness.Length, continentalness, heightFromContinentalness, noiseVal_2D);
 
                 for (int y = 0; y < height + yOffset; y++)
                 {
                     float noiseVal_3D = NoiseGen.GetNoise(noiseX, y + seedOffset.y, noiseZ, noise3D);
                     //float m_caveNoise = NoiseGen.GetNoise(noiseX, y + seedOffset.y, noiseZ, caveNoise);
 
-                    if(noiseVal_3D > 0f)
+                    if (noiseVal_3D > 0f)
                     {
                         int i = Block.GetFlatIndex(x, y, z);
                         blocks[i] = 1;
                     }
                 }
-            }
+            }     
         }
 
 

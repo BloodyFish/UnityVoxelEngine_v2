@@ -1,6 +1,8 @@
-using System.Runtime.CompilerServices;
 using BloodyFish.UnityVoxelEngine.v2;
+using System.Runtime.CompilerServices;
 using Unity.Burst;
+using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 
 
@@ -42,7 +44,6 @@ namespace BloodyFish.UnityVoxelEngine
                 snowBlockID = biome.snowBlock.blockID,
                 beachBlockID = biome.beachBlock.blockID,
 
-
                 minTemp = biome.minTemp,
                 maxTemp = biome.maxTemp,
 
@@ -52,17 +53,25 @@ namespace BloodyFish.UnityVoxelEngine
         }
 
         [BurstCompile]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float AdjustBiomeNoiseVal(float normalizedNoiseVal, int a, int b)
+        public static BiomeParameters GetBiome(float noiseX, float noiseY, float noiseZ, NoiseParameters temperatureParam, NoiseParameters precipitationParam, NativeArray<BiomeParameters> biomeParams)
         {
-            // tranform to fit into a to b
-            // a + (((x - xmin) * (b - a)) / (xmax - xmin))
+            BiomeParameters biome = biomeParams[0];
 
-            // our normalizedNoiseValue (-1 to 1) will be transformed to fit a to b
-            float newNoiseVal = a + (((normalizedNoiseVal - (-1)) * (b - a)) / (1 - (-1)));
+            float temperatureNoise = Unity.Mathematics.math.remap(-1, 1, -15, 35, NoiseGen.GetNoise(noiseX, noiseY, noiseZ, temperatureParam));
+            float precipitationNoise = Unity.Mathematics.math.remap(-1, 1, 0, 175, NoiseGen.GetNoise(noiseX, noiseY, noiseZ, precipitationParam));
 
-            return newNoiseVal;
+            foreach (BiomeParameters biomeParam in biomeParams)
+            {
+                if ((temperatureNoise >= biomeParam.minTemp && temperatureNoise <= biomeParam.maxTemp)
+                && (precipitationNoise >= biomeParam.minPreciptation && precipitationNoise <= biomeParam.maxPreciptation))
+                {
+                    biome = biomeParam;
+                    break;
+                }
+            }
 
+
+            return biome;
         }
     }
 

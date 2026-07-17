@@ -38,6 +38,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
             return noiseVal;
         }
 
+
         [BurstCompile]
         public static float GetNoise(float noiseX, float noiseY, float noiseZ, NoiseParameters noiseParams)
         {

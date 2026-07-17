@@ -28,15 +28,16 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 random = random,
                 chunkPos = chunkPos
             };
-
-            JobHandle treeJobHandle = treeGenJob.Schedule(dependency);
+            
+            int size = ChunkValues.WIDTH * ChunkValues.LENGTH * ChunkValues.HEIGHT;
+            JobHandle treeJobHandle = treeGenJob.ScheduleParallel(size, GenerationManager.GetGoodBatchSize(size), dependency);
             return treeJobHandle;
         }
 
     }
 
     [BurstCompile]
-    public struct TreeGenJob: IJob
+    public struct TreeGenJob: IJobParallelForBatch
     {
         public int minHeight;
         public int maxHeight;
@@ -48,6 +49,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
         public int minCanopyHeight;
         public int maxCanopyHeight;
 
+        [NativeDisableParallelForRestriction]
         public NativeArray<short> blocks;
 
         [ReadOnly]
@@ -65,33 +67,34 @@ namespace BloodyFish.UnityVoxelEngine.v2
         [ReadOnly]
         public int2 chunkPos;
 
-        public void Execute()
+        public void Execute(int startIndex, int count)
         {
-            for (int i = 0; i < ChunkValues.WIDTH * ChunkValues.LENGTH; i++)
+            for(int i = startIndex; i < startIndex + count; i++ ) 
             {
                 int x = i % ChunkValues.WIDTH;
                 int z = (i / ChunkValues.WIDTH) % ChunkValues.LENGTH;
+                int y = (i / (ChunkValues.WIDTH * ChunkValues.LENGTH)) % ChunkValues.HEIGHT;
 
-                for (int y = ChunkValues.HEIGHT - 1; y > WorldGenConstants.WATER_LEVEL; y--)
-                {
-                    int3 blockPos = new int3(x, y, z);
-                    int currentBlockID = Chunk.GetBlock(chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary);
-
-                    if (currentBlockID > 0)
+                if (y < ChunkValues.HEIGHT - 1 && y > WorldGenConstants.WATER_LEVEL)
                     {
-                        BlockData currentBlock = possibleBlocks[currentBlockID - 1];
+                        int3 blockPos = new int3(x, y, z);
+                        int currentBlockID = Chunk.GetBlock(chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary);
 
-                        if (currentBlock.canGrowTree && random.NextInt(0, 150) == 1 && !Block.GetNeighboringBlocks(x, y + 1, z, blocks).Contains(Block.WOOD))
+                        if (currentBlockID > 0)
                         {
-                            // While we are here, we might as well make it so that trees growing on grass blocks replace that block with dirt
-                            if (currentBlockID == Block.GRASS) Chunk.SetBlock(Block.DIRT, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary);
+                            BlockData currentBlock = possibleBlocks[currentBlockID - 1];
 
-                            Tree.GenerateTrunk(minHeight, maxHeight, trunkBlockID, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary, ref random, out int height);
-                            Tree.GenerateCanopy(canopyOverhang, minCanopyHeight, maxCanopyHeight, leafBlockID, chunkPos, new int3(x, y + height, z), blocks, bufferDictionary, chunkDictionary, ref random);
+                            if (currentBlock.canGrowTree && random.NextInt(0, 1000) == 1 && !Block.GetNeighboringBlocks(x, y + 1, z, blocks).Contains(Block.WOOD))
+                            {
+                                // While we are here, we might as well make it so that trees growing on grass blocks replace that block with dirt
+                                if (currentBlockID == Block.GRASS) Chunk.SetBlock(Block.DIRT, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary);
+
+                                Tree.GenerateTrunk(minHeight, maxHeight, trunkBlockID, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary, ref random, out int height);
+                                Tree.GenerateCanopy(canopyOverhang, minCanopyHeight, maxCanopyHeight, leafBlockID, chunkPos, new int3(x, y + height, z), blocks, bufferDictionary, chunkDictionary, ref random);
+                            }
+
+                           // break;
                         }
-
-                        break;
-                    }
                 }
             }
         }

@@ -17,7 +17,7 @@ MonoBehaviour:
   stoneBlock: {fileID: 11400000, guid: 2da916ac88fe1e942bee5f7bae517afb, type: 2}
   snowBlock: {fileID: 11400000, guid: 8d43b45e84b43bc48b608f2e0d69baae, type: 2}
   beachBlock: {fileID: 11400000, guid: 28e330f2ff05ac34ea43888430caab44, type: 2}
-  minTemp: -10
+  minTemp: 0
   maxTemp: 15
-  minPreciptation: 0
-  maxPreciptation: 50
+  minPreciptation: 50
+  maxPreciptation: 100
