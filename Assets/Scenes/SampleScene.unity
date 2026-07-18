@@ -168,12 +168,12 @@ MonoBehaviour:
     lacunarity: 3.5
     gain: 0.25
   temperatureNoiseParam:
-    frequency: 1
+    frequency: 0.5
     octaves: 2
     lacunarity: 3.5
     gain: 0.25
   perciptationNoiseParam:
-    frequency: 2.5
+    frequency: 1
     octaves: 4
     lacunarity: 3.5
     gain: 0.25

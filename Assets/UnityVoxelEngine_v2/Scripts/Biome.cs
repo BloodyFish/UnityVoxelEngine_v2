@@ -70,7 +70,6 @@ namespace BloodyFish.UnityVoxelEngine
                 }
             }
 
-
             return biome;
         }
     }

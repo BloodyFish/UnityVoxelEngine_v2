@@ -138,13 +138,20 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 int z = (i / ChunkValues.WIDTH) % ChunkValues.LENGTH;
                 int y = (i / (ChunkValues.WIDTH * ChunkValues.LENGTH)) % ChunkValues.HEIGHT;
 
-                float xOffset = xPos + seedOffset.x;
-                float zOffset = zPos + seedOffset.z;
 
-                float noiseX = x + xOffset;
-                float noiseZ = z + zOffset;
 
-                BiomeParameters biome = Biome.GetBiome(noiseX, y + seedOffset.y, noiseZ, temperatureNoiseParam, precipationNoiseParam, biomeParams);
+                BiomeParameters biome = biomeParams[0];
+
+                if(y > WorldGenConstants.WATER_LEVEL)
+                {
+                    float xOffset = xPos + seedOffset.x;
+                    float zOffset = zPos + seedOffset.z;
+
+                    float noiseX = x + xOffset;
+                    float noiseZ = z + zOffset;
+
+                    biome = Biome.GetBiome(noiseX, y + seedOffset.y, noiseZ, temperatureNoiseParam, precipationNoiseParam, biomeParams);
+                }
 
                 // The ID of the current, unpainted block
                 short id = blocks[i];
