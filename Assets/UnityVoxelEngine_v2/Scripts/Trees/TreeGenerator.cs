@@ -71,11 +71,14 @@ namespace BloodyFish.UnityVoxelEngine.v2
         {
             for(int i = startIndex; i < startIndex + count; i++ ) 
             {
-                int x = i % ChunkValues.WIDTH;
-                int z = (i / ChunkValues.WIDTH) % ChunkValues.LENGTH;
-                int y = (i / (ChunkValues.WIDTH * ChunkValues.LENGTH)) % ChunkValues.HEIGHT;
+                // We can check every other block
+                if (i % 2 == 0)
+                {
+                    int x = i % ChunkValues.WIDTH;
+                    int z = (i / ChunkValues.WIDTH) % ChunkValues.LENGTH;
+                    int y = (i / (ChunkValues.WIDTH * ChunkValues.LENGTH)) % ChunkValues.HEIGHT;
 
-                if (y < ChunkValues.HEIGHT - 1 && y > WorldGenConstants.WATER_LEVEL)
+                    if (y < ChunkValues.HEIGHT - 1 && y > WorldGenConstants.WATER_LEVEL)
                     {
                         int3 blockPos = new int3(x, y, z);
                         int currentBlockID = Chunk.GetBlock(chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary);
@@ -92,9 +95,8 @@ namespace BloodyFish.UnityVoxelEngine.v2
                                 Tree.GenerateTrunk(minHeight, maxHeight, trunkBlockID, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary, ref random, out int height);
                                 Tree.GenerateCanopy(canopyOverhang, minCanopyHeight, maxCanopyHeight, leafBlockID, chunkPos, new int3(x, y + height, z), blocks, bufferDictionary, chunkDictionary, ref random);
                             }
-
-                           // break;
                         }
+                    }
                 }
             }
         }
