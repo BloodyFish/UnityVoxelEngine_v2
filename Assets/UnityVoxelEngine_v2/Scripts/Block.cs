@@ -9,7 +9,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
 {
     public struct BlockData
     {
-        public short blockID;
+        [HideInInspector] public short blockID;
         public Color tint;
 
         public Vector2Int texCoord_front;
