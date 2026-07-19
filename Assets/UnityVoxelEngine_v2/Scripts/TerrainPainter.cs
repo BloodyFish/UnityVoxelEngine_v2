@@ -21,8 +21,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 chunkPos = chunkPos,
                 biomeParams = GenerationManager.biomeParams,
 
-                xPos = worldSpaceChunkPos.x,
-                zPos = worldSpaceChunkPos.y,
+                worldSpacePos = worldSpaceChunkPos,
                 seedOffset = GenerationManager.seedOffset,
 
                 temperatureNoiseParam = GenerationManager.instance.temperatureNoiseParam,
@@ -32,6 +31,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
             // NOTE: It is NOT a good idea to make the terrain paint job an IJobParallelFor. It will cause race conditions and lots of errors.
             JobHandle paintJobHandle = paintJob.ScheduleParallel(blocks.Length, GenerationManager.GetGoodBatchSize(blocks.Length), dependency);
+
             return paintJobHandle;
         }
 
@@ -96,7 +96,6 @@ namespace BloodyFish.UnityVoxelEngine.v2
         }
     }
 
-    // NOTE: It is NOT a good idea to make the terrain paint job an IJobParallelFor. It will cause race conditions and lots of errors.
 
     [BurstCompile]
     public struct TerrainPaintJob : IJobParallelForBatch
@@ -107,7 +106,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
         [NativeDisableContainerSafetyRestriction]
         public NativeParallelHashMap<int2, BlockBufferValues> bufferDictionary;
 
-        [ReadOnly]
+       // [ReadOnly]
         [NativeDisableContainerSafetyRestriction]
         public NativeParallelHashMap<int2, ChunkValues> chunkDictionary;
 
@@ -119,9 +118,9 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
         [ReadOnly]
         public NativeArray<BiomeParameters> biomeParams;
-        
+
         [ReadOnly]
-        public int xPos, zPos;
+        public int2 worldSpacePos;
 
         [ReadOnly]
         public float3 seedOffset;
@@ -130,28 +129,23 @@ namespace BloodyFish.UnityVoxelEngine.v2
         public NoiseParameters temperatureNoiseParam, precipationNoiseParam;
 
 
+
+
         public void Execute(int startIndex, int count)
         {
-            BiomeParameters biome = biomeParams[0];
+            short biomeID = 0;
             for (int i = startIndex; i < startIndex + count; i++)
             {
                 int x = i % ChunkValues.WIDTH;
                 int z = (i / ChunkValues.WIDTH) % ChunkValues.LENGTH;
                 int y = (i / (ChunkValues.WIDTH * ChunkValues.LENGTH)) % ChunkValues.HEIGHT;
 
-
-                if(y > WorldGenConstants.WATER_LEVEL)
+                if(y >= WorldGenConstants.WATER_LEVEL)
                 {
                     // We can find the biome every other block
                     if(i % 2 == 0)
                     {
-                        float xOffset = xPos + seedOffset.x;
-                        float zOffset = zPos + seedOffset.z;
-
-                        float noiseX = x + xOffset;
-                        float noiseZ = z + zOffset;
-
-                        biome = Biome.GetBiome(noiseX, y + seedOffset.y, noiseZ, temperatureNoiseParam, precipationNoiseParam, biomeParams);
+                        biomeID = Biome.GetBiome(worldSpacePos, seedOffset, x, y, z, temperatureNoiseParam, precipationNoiseParam, biomeParams);
                     }
                 }
 
@@ -160,9 +154,10 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
                 int3 blockPos = new int3(x, y, z);
 
-                TerrainPainter.PaintTerrain(ref random, id, chunkPos, blockPos, ref blocks, biome, bufferDictionary, chunkDictionary);
+                TerrainPainter.PaintTerrain(ref random, id, chunkPos, blockPos, ref blocks, biomeParams[biomeID], bufferDictionary, chunkDictionary);
                 TerrainPainter.FillWater(id, chunkPos, blockPos, ref blocks, bufferDictionary, chunkDictionary);
-            }      
+            }
+
         }
     }
 }

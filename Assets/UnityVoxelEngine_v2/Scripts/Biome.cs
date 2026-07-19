@@ -17,9 +17,12 @@ namespace BloodyFish.UnityVoxelEngine
         public short stoneBlockID;
         public short snowBlockID;
         public short beachBlockID;
+        public short treeStemBlockID;
+        public short treeLeafBlockID;
 
         public float minTemp, maxTemp;
         public float minPreciptation, maxPreciptation;
+        public int treeDensity;
     }
 
     [CreateAssetMenu]
@@ -31,8 +34,12 @@ namespace BloodyFish.UnityVoxelEngine
         public Block snowBlock;
         public Block beachBlock;
 
+        public Block treeStemBlock;
+        public Block treeLeafBlock;
+
         public float minTemp, maxTemp;
         public float minPreciptation, maxPreciptation;
+        public int treeDenisty;
 
         public static BiomeParameters CreateNewBiomeParameter(Biome biome)
         {            
@@ -43,34 +50,39 @@ namespace BloodyFish.UnityVoxelEngine
                 stoneBlockID = biome.stoneBlock.blockID,
                 snowBlockID = biome.snowBlock.blockID,
                 beachBlockID = biome.beachBlock.blockID,
+                treeStemBlockID = biome.treeStemBlock.blockID,
+                treeLeafBlockID = biome.treeLeafBlock.blockID,
 
                 minTemp = biome.minTemp,
                 maxTemp = biome.maxTemp,
 
                 minPreciptation = biome.minPreciptation,
-                maxPreciptation = biome.maxPreciptation
+                maxPreciptation = biome.maxPreciptation,
+                treeDensity = biome.treeDenisty
             };
         }
 
         [BurstCompile]
-        public static BiomeParameters GetBiome(float noiseX, float noiseY, float noiseZ, NoiseParameters temperatureParam, NoiseParameters precipitationParam, NativeArray<BiomeParameters> biomeParams)
+        public static short GetBiome(int2 worldSpacePos, float3 seedOffset, int x, int y, int z, NoiseParameters temperatureParam, NoiseParameters precipitationParam, NativeArray<BiomeParameters> biomeParams)
         {
-            BiomeParameters biome = biomeParams[0];
+            short biomeID = 0;
 
-            float temperatureNoise = Unity.Mathematics.math.remap(-1, 1, -15, 35, NoiseGen.GetNoise(noiseX, noiseY, noiseZ, temperatureParam));
-            float precipitationNoise = Unity.Mathematics.math.remap(-1, 1, 0, 175, NoiseGen.GetNoise(noiseX, noiseY, noiseZ, precipitationParam));
+            float temperatureNoise = Unity.Mathematics.math.remap(-1, 1, -15, 35, NoiseGen.GetNoise(worldSpacePos, seedOffset, x, y, z, temperatureParam));
+            float precipitationNoise = Unity.Mathematics.math.remap(-1, 1, 0, 175, NoiseGen.GetNoise(worldSpacePos, seedOffset, x, y, z, precipitationParam));
 
+            short i = 0;
             foreach (BiomeParameters biomeParam in biomeParams)
             {
                 if ((temperatureNoise >= biomeParam.minTemp && temperatureNoise <= biomeParam.maxTemp)
                 && (precipitationNoise >= biomeParam.minPreciptation && precipitationNoise <= biomeParam.maxPreciptation))
                 {
-                    biome = biomeParam;
+                    biomeID = i;
                     break;
                 }
+                i++;
             }
 
-            return biome;
+            return biomeID;
         }
     }
 

@@ -41,6 +41,8 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
         public MeshValues terrainMeshValues;
         public MeshValues waterMeshValues;
+
+        public short biomeID;
     }
 
     public struct BlockBufferValues
@@ -155,9 +157,11 @@ namespace BloodyFish.UnityVoxelEngine.v2
             chunkVals.random = new Unity.Mathematics.Random((uint)(GenerationManager.seed ^ pos.x ^ pos.y * int.MaxValue));
             chunkVals.generationPhase = GenerationPhase.IS_GEN_TERRAIN;
 
+            GenerationManager.chunkDictionary[pos] = chunkVals;
+
             JobHandle generationJobHandle = Generation.GenTerrain(chunkVals.worldSpacePos, ref chunkVals.blocks, ref chunkVals.random, out GenerateChunkValuesJob generationJob);
             JobHandle paintJobHandle = TerrainPainter.Paint(chunkVals.worldSpacePos, pos, ref chunkVals.blocks, ref chunkVals.random, generationJobHandle, out TerrainPaintJob paintJob);
-            JobHandle treeGenJobHandle = TreeGenerator.PlantTrees(pos, ref chunkVals.blocks, ref chunkVals.random, paintJobHandle, out TreeGenJob treeGenJob);
+            JobHandle treeGenJobHandle = TreeGenerator.PlantTrees(chunkVals.worldSpacePos, pos, ref chunkVals.blocks, ref chunkVals.random, paintJobHandle, out TreeGenJob treeGenJob);
 
             generationJobHandle.Complete();
             paintJobHandle.Complete();
@@ -168,7 +172,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
             chunkVals.generationPhase = GenerationPhase.DONE_GEN_TERRAIN;
             GenerationManager.chunkDictionary[pos] = chunkVals;
 
-            NativeList<ChunkValues> chunks = new NativeList<ChunkValues>(0, Allocator.TempJob);
+            NativeList<ChunkValues> chunks = new NativeList<ChunkValues>(0, Allocator.Temp);
             NativeArray<int2> busyChunksArray = busyChunks.ToArray(Allocator.Temp);
 
             // Cycle through possible neighbors and add them to "chunks"
@@ -200,9 +204,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 }
             } */
 
-            // Dispose "chunks" when done
             meshGenHandle.Complete(); 
-            chunks.Dispose();
         }
 
         [BurstCompile]

@@ -28,7 +28,6 @@ namespace BloodyFish.UnityVoxelEngine.v2
             {
                 ChunkValues chunkVals = chunkValsArray[i];
                 chunkVals.generationPhase = GenerationPhase.OPEN_FOR_MESH_GEN;
- 
                 GenerationManager.chunkDictionary[chunkVals.pos] = chunkVals;
             }
 
@@ -44,9 +43,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 continentalness = GenerationManager.continentalness,
                 heightFromContinentalness = GenerationManager.heightFromContinentalness,
 
-                xOffset = worldSpaceChunkPos.x + GenerationManager.seedOffset.x,
-                zOffset = worldSpaceChunkPos.y + GenerationManager.seedOffset.z,
-                yOffset = 0,
+                worldSpaceChunkPos = worldSpaceChunkPos,
 
                 seedOffset = GenerationManager.seedOffset,
                 noise2D = GenerationManager.instance.noise2DParam,
@@ -74,7 +71,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
         public NativeArray<float> heightFromContinentalness;
 
         [ReadOnly]
-        public float xOffset, yOffset, zOffset;
+        public int2 worldSpaceChunkPos;
 
         [ReadOnly]
         public float3 seedOffset;
@@ -90,17 +87,14 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 int x = index % ChunkValues.WIDTH;
                 int z = index / ChunkValues.WIDTH;
 
-                float noiseX = x + xOffset;
-                float noiseZ = z + zOffset;
-
-                float noiseVal_2D = NoiseGen.GetNoise(noiseX, noiseZ, noise2D);
+                float noiseVal_2D = NoiseGen.GetNoise(worldSpaceChunkPos, seedOffset, x, z, noise2D);
 
                 // Get the length of our continentalness to height spline
                 int height = GetTerrainHeight(continentalness.Length, continentalness, heightFromContinentalness, noiseVal_2D);
 
-                for (int y = 0; y < height + yOffset; y++)
+                for (int y = 0; y < height; y++)
                 {
-                    float noiseVal_3D = NoiseGen.GetNoise(noiseX, y + seedOffset.y, noiseZ, noise3D);
+                    float noiseVal_3D = NoiseGen.GetNoise(worldSpaceChunkPos, seedOffset, x, y, z, noise3D);
                     //float m_caveNoise = NoiseGen.GetNoise(noiseX, y + seedOffset.y, noiseZ, caveNoise);
 
                     if (noiseVal_3D > 0f)

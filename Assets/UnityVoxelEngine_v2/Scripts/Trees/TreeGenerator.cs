@@ -3,6 +3,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace BloodyFish.UnityVoxelEngine.v2
 {
@@ -10,14 +11,12 @@ namespace BloodyFish.UnityVoxelEngine.v2
     {
 
         [BurstCompile]
-        public static JobHandle PlantTrees(int2 chunkPos, ref NativeArray<short> blocks, ref Unity.Mathematics.Random random, JobHandle dependency, out TreeGenJob treeGenJob)
+        public static JobHandle PlantTrees(int2 worldSpaceChunkPos, int2 chunkPos, ref NativeArray<short> blocks, ref Unity.Mathematics.Random random, JobHandle dependency, out TreeGenJob treeGenJob)
         {
             treeGenJob = new TreeGenJob()
             {
                 minHeight = GenerationManager.defaultTree.minHeight,
                 maxHeight = GenerationManager.defaultTree.maxHeight,
-                trunkBlockID = GenerationManager.defaultTree.trunkBlock.blockID,
-                leafBlockID = GenerationManager.defaultTree.leafBlock.blockID,
                 canopyOverhang = GenerationManager.defaultTree.canopyOverhang,
                 minCanopyHeight = GenerationManager.defaultTree.minCanopyHeight,
                 maxCanopyHeight = GenerationManager.defaultTree.maxCanopyHeight,
@@ -26,9 +25,16 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 chunkDictionary = GenerationManager.chunkDictionary,
                 bufferDictionary = GenerationManager.bufferDictionary,
                 random = random,
-                chunkPos = chunkPos
+                worldSpaceChunkPos = worldSpaceChunkPos,
+                chunkPos = chunkPos,
+                seedOffset = GenerationManager.seedOffset,
+                biomeParams = GenerationManager.biomeParams,
+                temperatureNoiseParam = GenerationManager.instance.temperatureNoiseParam,
+                precipationNoiseParam = GenerationManager.instance.perciptationNoiseParam
             };
-            
+
+            //Debug.Log(GenerationManager.chunkDictionary[chunkPos].biomeID);
+
             int size = ChunkValues.WIDTH * ChunkValues.LENGTH * ChunkValues.HEIGHT;
             JobHandle treeJobHandle = treeGenJob.ScheduleParallel(size, GenerationManager.GetGoodBatchSize(size), dependency);
             return treeJobHandle;
@@ -42,8 +48,8 @@ namespace BloodyFish.UnityVoxelEngine.v2
         public int minHeight;
         public int maxHeight;
 
-        public short trunkBlockID;
-        public short leafBlockID;
+        /*public short trunkBlockID;
+        public short leafBlockID;*/
 
         public int canopyOverhang;
         public int minCanopyHeight;
@@ -65,7 +71,21 @@ namespace BloodyFish.UnityVoxelEngine.v2
         public Unity.Mathematics.Random random;
 
         [ReadOnly]
+        public int2 worldSpaceChunkPos;
+
+        [ReadOnly]
         public int2 chunkPos;
+
+        [ReadOnly]
+        public float3 seedOffset;
+
+        [ReadOnly]
+        public NativeArray<BiomeParameters> biomeParams;
+
+        [ReadOnly]
+        public NoiseParameters temperatureNoiseParam, precipationNoiseParam;
+
+
 
         public void Execute(int startIndex, int count)
         {
@@ -87,13 +107,17 @@ namespace BloodyFish.UnityVoxelEngine.v2
                         {
                             BlockData currentBlock = possibleBlocks[currentBlockID - 1];
 
-                            if (currentBlock.canGrowTree && random.NextInt(0, 1000) == 1 && !Block.GetNeighboringBlocks(x, y + 1, z, blocks).Contains(Block.WOOD))
+                            // CalculateBiome
+                            short biomeID = Biome.GetBiome(worldSpaceChunkPos, seedOffset, x, y, z, temperatureNoiseParam, precipationNoiseParam, biomeParams);
+
+
+                            if (currentBlock.canGrowTree && random.NextInt(0, biomeParams[biomeID].treeDensity) == 1 && !Block.GetNeighboringBlocks(x, y + 1, z, blocks).Contains(biomeParams[biomeID].treeStemBlockID))
                             {
                                 // While we are here, we might as well make it so that trees growing on grass blocks replace that block with dirt
-                                if (currentBlockID == Block.GRASS) Chunk.SetBlock(Block.DIRT, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary);
+                                if (currentBlockID == biomeParams[biomeID].topBlockID) Chunk.SetBlock(biomeParams[biomeID].middleBlockID, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary);
 
-                                Tree.GenerateTrunk(minHeight, maxHeight, trunkBlockID, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary, ref random, out int height);
-                                Tree.GenerateCanopy(canopyOverhang, minCanopyHeight, maxCanopyHeight, leafBlockID, chunkPos, new int3(x, y + height, z), blocks, bufferDictionary, chunkDictionary, ref random);
+                                Tree.GenerateTrunk(minHeight, maxHeight, biomeParams[biomeID].treeStemBlockID, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary, ref random, out int height);
+                                Tree.GenerateCanopy(canopyOverhang, minCanopyHeight, maxCanopyHeight, biomeParams[biomeID].treeLeafBlockID, chunkPos, new int3(x, y + height, z), blocks, bufferDictionary, chunkDictionary, ref random);
                             }
                         }
                     }

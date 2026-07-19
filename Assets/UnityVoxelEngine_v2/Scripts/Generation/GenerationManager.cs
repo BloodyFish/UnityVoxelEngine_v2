@@ -194,6 +194,23 @@ namespace BloodyFish.UnityVoxelEngine.v2
                     ChunkValues chunkValues = chunkDictionary[chunkPos];
                     chunkDictionary.Remove(chunkPos);
                     chunkValues.blocks.Dispose();
+
+                    chunkValues.terrainMeshValues.verts.Dispose();
+                    chunkValues.terrainMeshValues.tris.Dispose();
+                    chunkValues.terrainMeshValues.UVs.Dispose();
+                    chunkValues.terrainMeshValues.colors.Dispose();
+
+
+                    chunkValues.waterMeshValues.verts.Dispose();
+                    chunkValues.waterMeshValues.tris.Dispose();
+                    chunkValues.waterMeshValues.UVs.Dispose();
+                    chunkValues.waterMeshValues.colors.Dispose();
+
+
+
+                    BlockBufferValues bufferValues = bufferDictionary[chunkPos];
+                    bufferDictionary.Remove(chunkPos);
+                    bufferValues.blocks.Dispose();
                 }
 
                 if (!CalculateIfInCameraFrustrum(Chunk.FindChunkCenter(chunkPos)))

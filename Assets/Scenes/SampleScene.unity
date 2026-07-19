@@ -169,12 +169,12 @@ MonoBehaviour:
     gain: 0.25
   temperatureNoiseParam:
     frequency: 0.5
-    octaves: 2
-    lacunarity: 3.5
+    octaves: 4
+    lacunarity: 5
     gain: 0.25
   perciptationNoiseParam:
     frequency: 1
-    octaves: 4
+    octaves: 3
     lacunarity: 3.5
     gain: 0.25
   biomes:
@@ -184,8 +184,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 176a38224e3944335be85c97c7bbc01e, type: 2}
   - {fileID: 11400000, guid: 53fa62138b4fb4b538d64641070838d8, type: 2}
   defaultStoneBlock: {fileID: 11400000, guid: 2da916ac88fe1e942bee5f7bae517afb, type: 2}
-  randomizeSeed: 1
-  seedInput: 672049728
+  randomizeSeed: 0
+  seedInput: 741616960
   renderDistance: 32
 --- !u!4 &116216381
 Transform:
@@ -312,7 +312,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UsePipelineSettings: 1
+  m_UsePipelineSettings: 0
   m_AdditionalLightsShadowResolutionTier: 2
   m_CustomShadowLayers: 0
   m_LightCookieSize: {x: 1, y: 1}

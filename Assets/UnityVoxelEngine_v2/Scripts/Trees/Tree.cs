@@ -18,6 +18,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
         public int minCanopyHeight;
         public int maxCanopyHeight;
 
+
         [BurstCompile]
         public static void GenerateTrunk(int minHeight, int maxHeight, short trunkBlockID, int2 chunkPos, int3 blockPos, 
             NativeArray<short> blocks,
