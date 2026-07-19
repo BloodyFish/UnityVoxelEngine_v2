@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a7111ecfda2df9845b322381795e2761, type: 3}
-  m_Name: BasicTree
+  m_Name: OakTree
   m_EditorClassIdentifier: Assembly-CSharp::BasicTree
   trunkBlock: {fileID: 11400000, guid: c73ed7b58c7f7a74eb2185e94ff6a9f4, type: 2}
   leafBlock: {fileID: 11400000, guid: 4e70cfb554fb9384e9c600649551a625, type: 2}

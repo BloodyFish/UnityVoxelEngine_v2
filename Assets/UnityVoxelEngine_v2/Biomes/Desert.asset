@@ -17,9 +17,10 @@ MonoBehaviour:
   stoneBlock: {fileID: 11400000, guid: 2da916ac88fe1e942bee5f7bae517afb, type: 2}
   snowBlock: {fileID: 11400000, guid: 28e330f2ff05ac34ea43888430caab44, type: 2}
   beachBlock: {fileID: 11400000, guid: 28e330f2ff05ac34ea43888430caab44, type: 2}
-  treeStemBlock: {fileID: 11400000, guid: c73ed7b58c7f7a74eb2185e94ff6a9f4, type: 2}
-  treeLeafBlock: {fileID: 11400000, guid: 4e70cfb554fb9384e9c600649551a625, type: 2}
   minTemp: -5
   maxTemp: 30
   minPreciptation: 0
   maxPreciptation: 50
+  treeDenisty: 0
+  trees:
+  - {fileID: 11400000, guid: e4eb56050c4720148a1d428d91054ac1, type: 2}

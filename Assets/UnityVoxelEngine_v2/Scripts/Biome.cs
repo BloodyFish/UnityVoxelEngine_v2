@@ -1,4 +1,5 @@
 using BloodyFish.UnityVoxelEngine.v2;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.Burst;
 using Unity.Collections;
@@ -23,6 +24,7 @@ namespace BloodyFish.UnityVoxelEngine
         public float minTemp, maxTemp;
         public float minPreciptation, maxPreciptation;
         public int treeDensity;
+        public NativeArray<TreeValues> treeValsArray;
     }
 
     [CreateAssetMenu]
@@ -34,15 +36,33 @@ namespace BloodyFish.UnityVoxelEngine
         public Block snowBlock;
         public Block beachBlock;
 
-        public Block treeStemBlock;
-        public Block treeLeafBlock;
-
         public float minTemp, maxTemp;
         public float minPreciptation, maxPreciptation;
         public int treeDenisty;
 
+        public List<BloodyFish.UnityVoxelEngine.v2.Tree> trees;
+        //public BloodyFish.UnityVoxelEngine.v2.Tree tree;
+
+
         public static BiomeParameters CreateNewBiomeParameter(Biome biome)
-        {            
+        {
+            NativeArray<TreeValues> treeValsArray = new NativeArray<TreeValues>(biome.trees.Count, Allocator.Persistent);
+
+            int index = 0;
+            foreach(BloodyFish.UnityVoxelEngine.v2.Tree tree in biome.trees)
+            {
+                treeValsArray[index++] = new TreeValues
+                {
+                    trunkBlockID = tree.trunkBlock.blockID,
+                    leafBlockID = tree.leafBlock.blockID,
+                    minHeight = tree.minHeight,
+                    maxHeight = tree.maxHeight,
+                    canopyOverhang = tree.canopyOverhang,
+                    minCanopyHeight = tree.minCanopyHeight,
+                    maxCanopyHeight = tree.maxCanopyHeight
+                };
+            }
+
             return new BiomeParameters
             {
                 topBlockID = biome.topBlock.blockID,
@@ -50,15 +70,15 @@ namespace BloodyFish.UnityVoxelEngine
                 stoneBlockID = biome.stoneBlock.blockID,
                 snowBlockID = biome.snowBlock.blockID,
                 beachBlockID = biome.beachBlock.blockID,
-                treeStemBlockID = biome.treeStemBlock.blockID,
-                treeLeafBlockID = biome.treeLeafBlock.blockID,
 
                 minTemp = biome.minTemp,
                 maxTemp = biome.maxTemp,
 
                 minPreciptation = biome.minPreciptation,
                 maxPreciptation = biome.maxPreciptation,
-                treeDensity = biome.treeDenisty
+                treeDensity = biome.treeDenisty,
+
+                treeValsArray = treeValsArray,
             };
         }
 

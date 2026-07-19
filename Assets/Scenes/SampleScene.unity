@@ -184,7 +184,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 176a38224e3944335be85c97c7bbc01e, type: 2}
   - {fileID: 11400000, guid: 53fa62138b4fb4b538d64641070838d8, type: 2}
   defaultStoneBlock: {fileID: 11400000, guid: 2da916ac88fe1e942bee5f7bae517afb, type: 2}
-  randomizeSeed: 0
+  randomizeSeed: 1
   seedInput: 741616960
   renderDistance: 32
 --- !u!4 &116216381
@@ -374,7 +374,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5666488a991349799f067bcdc4640b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
-  speed: 7
+  speed: 21
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0

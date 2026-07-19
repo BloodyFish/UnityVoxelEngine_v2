@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4d46532c31ac7004daad140866c2ca94, type: 3}
-  m_Name: Mushroom Stem
+  m_Name: Brown Mushroom
   m_EditorClassIdentifier: Assembly-CSharp::BloodyFish.UnityVoxelEngine.v2.Block
-  blockName: Mushroom Stem
-  blockID: 7
+  blockName: Brown Mushroom
+  blockID: 0
   tint:
     serializedVersion: 2
     rgba: 16777215
-  texCoord_front: {x: 13, y: 7}
-  texCoord_back: {x: 13, y: 7}
-  texCoord_left: {x: 13, y: 7}
-  texCoord_right: {x: 13, y: 7}
-  texCoord_top: {x: 14, y: 7}
-  texCoord_bottom: {x: 14, y: 7}
+  texCoord_front: {x: 14, y: 8}
+  texCoord_back: {x: 14, y: 8}
+  texCoord_left: {x: 14, y: 8}
+  texCoord_right: {x: 14, y: 8}
+  texCoord_top: {x: 14, y: 8}
+  texCoord_bottom: {x: 14, y: 8}
   isTransparent: 0
   canGrowTree: 0

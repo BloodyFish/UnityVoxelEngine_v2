@@ -117,6 +117,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
         public int2 chunkPos;
 
         [ReadOnly]
+        [NativeDisableContainerSafetyRestriction]
         public NativeArray<BiomeParameters> biomeParams;
 
         [ReadOnly]

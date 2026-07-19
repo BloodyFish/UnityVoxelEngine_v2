@@ -15,11 +15,6 @@ namespace BloodyFish.UnityVoxelEngine.v2
         {
             treeGenJob = new TreeGenJob()
             {
-                minHeight = GenerationManager.defaultTree.minHeight,
-                maxHeight = GenerationManager.defaultTree.maxHeight,
-                canopyOverhang = GenerationManager.defaultTree.canopyOverhang,
-                minCanopyHeight = GenerationManager.defaultTree.minCanopyHeight,
-                maxCanopyHeight = GenerationManager.defaultTree.maxCanopyHeight,
                 blocks = blocks,
                 possibleBlocks = Block.possibleBlocks,
                 chunkDictionary = GenerationManager.chunkDictionary,
@@ -45,15 +40,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
     [BurstCompile]
     public struct TreeGenJob: IJobParallelForBatch
     {
-        public int minHeight;
-        public int maxHeight;
-
-        /*public short trunkBlockID;
-        public short leafBlockID;*/
-
-        public int canopyOverhang;
-        public int minCanopyHeight;
-        public int maxCanopyHeight;
+        // The [NativeDisableContainerSafetyRestriction] allows us to bypass the "Nested Native Containers are illegal in jobs" error
 
         [NativeDisableParallelForRestriction]
         public NativeArray<short> blocks;
@@ -80,6 +67,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
         public float3 seedOffset;
 
         [ReadOnly]
+        [NativeDisableContainerSafetyRestriction]
         public NativeArray<BiomeParameters> biomeParams;
 
         [ReadOnly]
@@ -116,8 +104,10 @@ namespace BloodyFish.UnityVoxelEngine.v2
                                 // While we are here, we might as well make it so that trees growing on grass blocks replace that block with dirt
                                 if (currentBlockID == biomeParams[biomeID].topBlockID) Chunk.SetBlock(biomeParams[biomeID].middleBlockID, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary);
 
-                                Tree.GenerateTrunk(minHeight, maxHeight, biomeParams[biomeID].treeStemBlockID, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary, ref random, out int height);
-                                Tree.GenerateCanopy(canopyOverhang, minCanopyHeight, maxCanopyHeight, biomeParams[biomeID].treeLeafBlockID, chunkPos, new int3(x, y + height, z), blocks, bufferDictionary, chunkDictionary, ref random);
+                                TreeValues treeVals = biomeParams[biomeID].treeValsArray[random.NextInt(0, biomeParams[biomeID].treeValsArray.Length)];
+
+                                Tree.GenerateTrunk(treeVals, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary, ref random, out int height);
+                                Tree.GenerateCanopy(treeVals, chunkPos, new int3(x, y + height, z), blocks, bufferDictionary, chunkDictionary, ref random);
                             }
                         }
                     }

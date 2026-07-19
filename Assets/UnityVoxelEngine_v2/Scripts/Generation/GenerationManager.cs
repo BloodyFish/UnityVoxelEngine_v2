@@ -26,8 +26,8 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
         public NoiseParameters noise2DParam;
 
-        public  NoiseParameters noise3DParam; // unused... for now
-        public NoiseParameters caveNoiseParam;
+        public  NoiseParameters noise3DParam;
+        public NoiseParameters caveNoiseParam;  // unused... for now
         public NoiseParameters temperatureNoiseParam;
         public NoiseParameters perciptationNoiseParam;
 
@@ -57,10 +57,6 @@ namespace BloodyFish.UnityVoxelEngine.v2
             new int2(0, -1)
         };
 
-
-        // FOR TESTING
-        [ReadOnly]
-        public static Tree defaultTree;
 
         private static Dictionary<float, float> continentalnessToHeight = new Dictionary<float, float>()
         {
@@ -155,7 +151,6 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
             Chunk.mat = Resources.Load<Material>("ChunkMaterial");
             Chunk.waterMat = Resources.Load<Material>("WaterMaterial");
-            defaultTree = Resources.Load<Tree>("Trees/BasicTree");
 
 
             blockRenderDistance = renderDistance * ChunkValues.WIDTH;
@@ -207,8 +202,8 @@ namespace BloodyFish.UnityVoxelEngine.v2
                     chunkValues.waterMeshValues.colors.Dispose();
 
 
-
-                    BlockBufferValues bufferValues = bufferDictionary[chunkPos];
+                    bufferDictionary.TryGetValue(chunkPos, out BlockBufferValues blockBufferValues);
+                    BlockBufferValues bufferValues = blockBufferValues;
                     bufferDictionary.Remove(chunkPos);
                     bufferValues.blocks.Dispose();
                 }
@@ -280,12 +275,21 @@ namespace BloodyFish.UnityVoxelEngine.v2
             {
                 Gizmos.DrawWireCube(Chunk.FindChunkCenter(chunkPos), size);
             }
+
+            // FOR TESTING PURPOSES:
+            /*Gizmos.color = Color.powderBlue;
+            foreach(int2 chunkPos in Chunk.busyChunks.ToArray(Allocator.Temp))
+            {
+                if(chunkDictionary.TryGetValue(chunkPos, out ChunkValues chunk) && chunk.generationPhase == GenerationPhase.OPEN_FOR_MESH_GEN)
+                {
+                    Gizmos.color = Color.green;
+                }
+                Gizmos.DrawWireCube(Chunk.FindChunkCenter(chunkPos), size);
+            }*/ 
         }
 
         IEnumerator GenerateChunk()
         {
-            chunkQueue.Clear();
-
             while (true)
             {
                 if(chunkQueue.Count == 0)
@@ -371,6 +375,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
                             continue;
                         }
     
+
                         Chunk.busyChunks.Enqueue(chunkPos);
                     }
                 }
