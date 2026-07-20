@@ -195,16 +195,14 @@ namespace BloodyFish.UnityVoxelEngine.v2
             
             // Start mesh gen for "chunks"
             JobHandle meshGenHandle = Generation.StartMeshGen(ref chunks, paintJobHandle);
-
-            /*for(int i = 0; i < chunks.Length; i++)
-            {
-                ChunkValues chunk = chunks[i];
-                if (!busyChunks.ToArray(Allocator.Temp).Contains(chunk.pos)){
-                    busyChunks.Enqueue(chunk.pos);
-                }
-            } */
-
             meshGenHandle.Complete(); 
+
+            for(int i = 0; i < chunks.Length; i++)
+            {
+                ChunkValues m_chunkVals = chunks[i];
+                m_chunkVals.generationPhase = GenerationPhase.OPEN_FOR_MESH_GEN;
+                GenerationManager.chunkDictionary[m_chunkVals.pos] = m_chunkVals;
+            }
         }
 
         [BurstCompile]
@@ -327,6 +325,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
             Mesher.Meshify(chunkObj.transform.GetChild(0).gameObject, chunkVals.waterMeshValues);
 
             chunkVals.generationPhase = GenerationPhase.IDLE;
+            GenerationManager.chunkDictionary[chunkVals.pos] = chunkVals;
         }
     }
 }
