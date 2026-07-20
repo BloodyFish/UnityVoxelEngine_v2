@@ -277,7 +277,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
             }
 
             // FOR TESTING PURPOSES:
-            Gizmos.color = Color.powderBlue;
+            /*Gizmos.color = Color.powderBlue;
             foreach(int2 chunkPos in Chunk.busyChunks.ToArray(Allocator.Temp))
             {
                 if(chunkDictionary.TryGetValue(chunkPos, out ChunkValues chunk) && chunk.generationPhase == GenerationPhase.OPEN_FOR_MESH_GEN)
@@ -285,11 +285,11 @@ namespace BloodyFish.UnityVoxelEngine.v2
                     Gizmos.color = Color.green;
                 }
                 Gizmos.DrawWireCube(Chunk.FindChunkCenter(chunkPos), size);
-            }
+            }*/ 
         }
 
         IEnumerator GenerateChunk()
-        {            
+        {
             while (true)
             {
                 if(chunkQueue.Count == 0)
@@ -328,6 +328,11 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 
                 do
                 {
+                    /*if(chunkDictionary.TryGetValue(potentialNeighborPos, out ChunkValues chunk) && !Chunk.BusyChunkContains(potentialNeighborPos) && chunk.generationPhase == GenerationPhase.OPEN_FOR_MESH_GEN)
+                    {       
+                        Chunk.Meshify(ref chunk);
+                    }*/
+
                     if (!CalculateIfInCameraFrustrum(Chunk.FindChunkCenter(potentialNeighborPos))
                     || Vector2.Distance(new Vector2(potentialNeighborPos.x * ChunkValues.WIDTH, potentialNeighborPos.y * ChunkValues.LENGTH), playerPos) > blockRenderDistance)
                     {

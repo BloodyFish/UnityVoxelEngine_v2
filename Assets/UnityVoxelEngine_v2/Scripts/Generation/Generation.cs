@@ -23,6 +23,14 @@ namespace BloodyFish.UnityVoxelEngine.v2
             };
 
             JobHandle meshGenHandle = meshGenJob.Schedule(chunkValsArray.Length, GenerationManager.GetGoodBatchSize(chunkValsArray.Length), dependency);
+
+            for(int i = 0; i < chunkValsArray.Length; i++)
+            {
+                ChunkValues chunkVals = chunkValsArray[i];
+                chunkVals.generationPhase = GenerationPhase.OPEN_FOR_MESH_GEN;
+                GenerationManager.chunkDictionary[chunkVals.pos] = chunkVals;
+            }
+
             return meshGenHandle;
         }
 
