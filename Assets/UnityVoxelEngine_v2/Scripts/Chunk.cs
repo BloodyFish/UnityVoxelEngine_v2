@@ -6,6 +6,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace BloodyFish.UnityVoxelEngine.v2
@@ -31,8 +32,9 @@ namespace BloodyFish.UnityVoxelEngine.v2
         [ReadOnly]
         public const int HEIGHT = 384;
 
-
+        [NativeDisableParallelForRestriction]
         public NativeArray<short> blocks;
+
         public int2 pos;
         public int2 worldSpacePos;
         
@@ -43,6 +45,12 @@ namespace BloodyFish.UnityVoxelEngine.v2
         public MeshValues waterMeshValues;
 
         public short biomeID;
+
+        public JobHandle treeGenJobHandle;
+        public TreeGenJob treeGenJob;
+
+        public JobHandle meshGenJobHandle;
+        public StartMeshGenJob meshGenJob;
     }
 
     public struct BlockBufferValues
@@ -157,74 +165,35 @@ namespace BloodyFish.UnityVoxelEngine.v2
             chunkVals.random = new Unity.Mathematics.Random((uint)(GenerationManager.seed ^ pos.x ^ pos.y * int.MaxValue));
             chunkVals.generationPhase = GenerationPhase.IS_GEN_TERRAIN;
 
-            GenerationManager.chunkDictionary[pos] = chunkVals;
-
             JobHandle generationJobHandle = Generation.GenTerrain(chunkVals.worldSpacePos, ref chunkVals.blocks, ref chunkVals.random, out GenerateChunkValuesJob generationJob);
             JobHandle paintJobHandle = TerrainPainter.Paint(chunkVals.worldSpacePos, pos, ref chunkVals.blocks, ref chunkVals.random, generationJobHandle, out TerrainPaintJob paintJob);
             JobHandle treeGenJobHandle = TreeGenerator.PlantTrees(chunkVals.worldSpacePos, pos, ref chunkVals.blocks, ref chunkVals.random, paintJobHandle, out TreeGenJob treeGenJob);
 
-            generationJobHandle.Complete();
-            paintJobHandle.Complete();
-            treeGenJobHandle.Complete();
+            // We only need to track the last job in the dependency chain
+            chunkVals.treeGenJobHandle = treeGenJobHandle;
+            chunkVals.treeGenJob = treeGenJob;
 
-            chunkVals.blocks.CopyFrom(treeGenJob.blocks);
-
-            chunkVals.generationPhase = GenerationPhase.DONE_GEN_TERRAIN;
             GenerationManager.chunkDictionary[pos] = chunkVals;
-
-            NativeList<ChunkValues> chunks = new NativeList<ChunkValues>(0, Allocator.Temp);
-            NativeArray<int2> busyChunksArray = busyChunks.ToArray(Allocator.Temp);
-
-            // Cycle through possible neighbors and add them to "chunks"
-            // NOTE: one of the offsets is int(0, 0) whihc includes the current chunk
-            for (int i = 0; i < offsets.Length; i++)
-            {
-                if(GenerationManager.chunkDictionary.TryGetValue(pos + offsets[i], out ChunkValues neighbor) && (neighbor.blocks.Length > 0 || GenerationManager.bufferDictionary[pos + offsets[i]].blocks.Length > 0))
-                {
-                    // We call MergeBlockBuffer() here so that any last minute additions to the buffer can be accounted for
-                    MergeBlockBuffer(ref neighbor);
-                    GenerationManager.chunkDictionary[neighbor.pos] = neighbor;
-                    chunks.Add(neighbor);
-
-                    if(!busyChunksArray.Contains(neighbor.pos))
-                    {
-                        busyChunks.Enqueue(neighbor.pos);
-                    }
-                }   
-            }
-            
-            // Start mesh gen for "chunks"
-            JobHandle meshGenHandle = Generation.StartMeshGen(ref chunks, paintJobHandle);
-
-            /*for(int i = 0; i < chunks.Length; i++)
-            {
-                ChunkValues chunk = chunks[i];
-                if (!busyChunks.ToArray(Allocator.Temp).Contains(chunk.pos)){
-                    busyChunks.Enqueue(chunk.pos);
-                }
-            } */
-
-            meshGenHandle.Complete(); 
         }
 
         [BurstCompile]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void MergeBlockBuffer(ref ChunkValues chunkVals)
+        public static void MergeBlockBuffer(int2 chunkPos, NativeArray<short> blocks)
         {
 
-            if(GenerationManager.bufferDictionary.TryGetValue(chunkVals.pos, out BlockBufferValues blockBuffer))
+            if(GenerationManager.bufferDictionary.TryGetValue(chunkPos, out BlockBufferValues blockBuffer))
             {
-                for (int i = 0; i < chunkVals.blocks.Length; i++)
+                for (int i = 0; i < blocks.Length; i++)
                 {
                     short bufferBlockID = blockBuffer.blocks[i];
                     
-                    if (chunkVals.blocks[i] == 0 && bufferBlockID != 0)
+                    if (blocks[i] == 0 && bufferBlockID != 0)
                     {
-                        chunkVals.blocks[i] = bufferBlockID;
+                        blocks[i] = bufferBlockID;
                     }
                 }
 
-                GenerationManager.bufferDictionary.Remove(chunkVals.pos);
+                GenerationManager.bufferDictionary.Remove(chunkPos);
             }
         }
 
@@ -327,6 +296,33 @@ namespace BloodyFish.UnityVoxelEngine.v2
             Mesher.Meshify(chunkObj.transform.GetChild(0).gameObject, chunkVals.waterMeshValues);
 
             chunkVals.generationPhase = GenerationPhase.IDLE;
+        }
+
+        public static void DisposeOfChunk(int2 chunkPos)
+        {
+            ChunkValues chunkValues = GenerationManager.chunkDictionary[chunkPos];
+            GenerationManager.chunkDictionary.Remove(chunkPos);
+
+            chunkValues.treeGenJobHandle.Complete();
+            chunkValues.meshGenJobHandle.Complete();
+            chunkValues.blocks.Dispose();
+
+            chunkValues.terrainMeshValues.verts.Dispose();
+            chunkValues.terrainMeshValues.tris.Dispose();
+            chunkValues.terrainMeshValues.UVs.Dispose();
+            chunkValues.terrainMeshValues.colors.Dispose();
+
+
+            chunkValues.waterMeshValues.verts.Dispose();
+            chunkValues.waterMeshValues.tris.Dispose();
+            chunkValues.waterMeshValues.UVs.Dispose();
+            chunkValues.waterMeshValues.colors.Dispose();
+
+
+            GenerationManager.bufferDictionary.TryGetValue(chunkPos, out BlockBufferValues blockBufferValues);
+            BlockBufferValues bufferValues = blockBufferValues;
+            GenerationManager.bufferDictionary.Remove(chunkPos);
+            bufferValues.blocks.Dispose();
         }
     }
 }

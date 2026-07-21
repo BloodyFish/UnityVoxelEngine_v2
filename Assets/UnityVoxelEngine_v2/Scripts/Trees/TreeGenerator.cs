@@ -41,7 +41,6 @@ namespace BloodyFish.UnityVoxelEngine.v2
     public struct TreeGenJob: IJobParallelForBatch
     {
         // The [NativeDisableContainerSafetyRestriction] allows us to bypass the "Nested Native Containers are illegal in jobs" error
-
         [NativeDisableParallelForRestriction]
         public NativeArray<short> blocks;
 

@@ -184,7 +184,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 176a38224e3944335be85c97c7bbc01e, type: 2}
   - {fileID: 11400000, guid: 53fa62138b4fb4b538d64641070838d8, type: 2}
   defaultStoneBlock: {fileID: 11400000, guid: 2da916ac88fe1e942bee5f7bae517afb, type: 2}
-  randomizeSeed: 1
+  randomizeSeed: 0
   seedInput: 741616960
   renderDistance: 32
 --- !u!4 &116216381

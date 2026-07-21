@@ -12,9 +12,9 @@ namespace BloodyFish.UnityVoxelEngine.v2
     public class Generation
     {    
         [BurstCompile]
-        public static JobHandle StartMeshGen(ref NativeList<ChunkValues> chunkValsArray, JobHandle dependency)
+        public static JobHandle StartMeshGen(NativeList<ChunkValues> chunkValsArray, JobHandle dependency, out StartMeshGenJob meshGenJob)
         {
-            StartMeshGenJob meshGenJob = new StartMeshGenJob
+            meshGenJob = new StartMeshGenJob
             {
                 chunkValsArray = chunkValsArray,
                 chunkDictionary = GenerationManager.chunkDictionary,
@@ -23,14 +23,6 @@ namespace BloodyFish.UnityVoxelEngine.v2
             };
 
             JobHandle meshGenHandle = meshGenJob.Schedule(chunkValsArray.Length, GenerationManager.GetGoodBatchSize(chunkValsArray.Length), dependency);
-
-            for(int i = 0; i < chunkValsArray.Length; i++)
-            {
-                ChunkValues chunkVals = chunkValsArray[i];
-                chunkVals.generationPhase = GenerationPhase.OPEN_FOR_MESH_GEN;
-                GenerationManager.chunkDictionary[chunkVals.pos] = chunkVals;
-            }
-
             return meshGenHandle;
         }
 
@@ -139,10 +131,10 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
     }
 
-
     [BurstCompile]
-    struct StartMeshGenJob : IJobParallelFor
+    public struct StartMeshGenJob : IJobParallelFor
     {
+        [ReadOnly]
         [NativeDisableContainerSafetyRestriction]
         public NativeList<ChunkValues> chunkValsArray;
 
@@ -151,17 +143,18 @@ namespace BloodyFish.UnityVoxelEngine.v2
         public NativeParallelHashMap<int2, ChunkValues> chunkDictionary;
 
         [ReadOnly]
-        public NativeArray<BlockData> possibleBlocks; 
+        [NativeDisableParallelForRestriction]
+        public NativeArray<BlockData> possibleBlocks;
 
 
         public void Execute(int i)
         {
             ChunkValues chunkVals = chunkValsArray[i];
 
-            Mesher.GenerateMeshValues(ref chunkVals, chunkDictionary, possibleBlocks);
-            Mesher.GenerateMeshValuesWater(ref chunkVals, chunkDictionary);
-
-            chunkValsArray[i] = chunkVals;
+            // We don't need to pass chunkVals by ref becuase the contents (which Mesher changes) are pointers
+            // We will need to use ref when we pass in the verts, uvs, tris, etc. to add to them
+            Mesher.GenerateMeshValues(chunkVals, chunkDictionary, possibleBlocks);
+            Mesher.GenerateMeshValuesWater(chunkVals, chunkDictionary);
         }
     }
 }

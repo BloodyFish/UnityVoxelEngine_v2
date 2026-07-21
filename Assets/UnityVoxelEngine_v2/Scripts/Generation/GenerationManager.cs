@@ -5,8 +5,10 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
+using static UnityEditor.PlayerSettings;
 
 namespace BloodyFish.UnityVoxelEngine.v2
 {
@@ -180,32 +182,83 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
             foreach (int2 chunkPos in chunkObjectDictionary.Keys.ToList())
             {
+                chunkDictionary.TryGetValue(chunkPos, out ChunkValues chunk);
+                if (chunk.generationPhase == GenerationPhase.IS_GEN_TERRAIN && chunk.treeGenJobHandle.IsCompleted)
+                {
+                    chunk.treeGenJobHandle.Complete();
+                    chunk.blocks = new NativeArray<short>(chunk.treeGenJob.blocks, Allocator.Persistent);
+                    chunk.treeGenJob.blocks.Dispose();
+
+                    chunk.generationPhase = GenerationPhase.DONE_GEN_TERRAIN;
+                    chunkDictionary[chunkPos] = chunk;
+
+                    Chunk.busyChunks.Enqueue(chunkPos);
+
+                    //print(chunk.blocks.Length);
+
+
+                    NativeList<ChunkValues> chunks = new NativeList<ChunkValues>(0, Allocator.Persistent);
+                    NativeArray<int2> busyChunksArray = Chunk.busyChunks.ToArray(Allocator.Temp);
+
+
+                    // Cycle through possible neighbors and add them to "chunks"
+                    // NOTE: one of the offsets is int(0, 0) whihc includes the current chunk
+                    for (int i = 0; i < Chunk.offsets.Length; i++)
+                    {
+                        if (chunkDictionary.TryGetValue(chunk.pos + Chunk.offsets[i], out ChunkValues neighbor) && (neighbor.blocks.Length > 0 || bufferDictionary[chunk.pos + Chunk.offsets[i]].blocks.Length > 0))
+                        {
+                            // We only want to mesh neighbors that are done generating terrain (or are at a further stage)
+                            if(neighbor.generationPhase >= GenerationPhase.DONE_GEN_TERRAIN)
+                            {
+                                // We call MergeBlockBuffer() here so that any last minute additions to the buffer can be accounted for
+                                Chunk.MergeBlockBuffer(neighbor.pos, neighbor.blocks);
+                                neighbor.generationPhase = GenerationPhase.IS_GEN_MESH_VALUES;
+                                chunkDictionary[neighbor.pos] = neighbor;
+                                chunks.Add(neighbor);
+
+                                if (!busyChunksArray.Contains(neighbor.pos))
+                                {
+                                    Chunk.busyChunks.Enqueue(neighbor.pos);
+                                }
+                            }
+                        }
+                    }
+
+                    JobHandle meshGenHandle = Generation.StartMeshGen(chunks, chunk.treeGenJobHandle, out StartMeshGenJob meshGenJob);
+
+                    for(int i = 0; i < chunks.Length; i++)
+                    {
+                        ChunkValues m_chunk = chunks[i];
+                        m_chunk.meshGenJobHandle = meshGenHandle;
+                        m_chunk.meshGenJob = meshGenJob;
+                        chunks[i] = m_chunk;
+                        chunkDictionary[m_chunk.pos] = m_chunk;
+                    }
+
+                    chunkDictionary[chunkPos] = chunk;
+                }
+
+                NativeList<ChunkValues> m_chunks = chunk.meshGenJob.chunkValsArray;
+                if (chunk.generationPhase == GenerationPhase.IS_GEN_MESH_VALUES && chunk.meshGenJobHandle.IsCompleted && m_chunks.IsCreated)
+                {
+                    for(int i = 0; i < chunk.meshGenJob.chunkValsArray.Length; i++)
+                    {
+                        ChunkValues m_chunk = m_chunks[i];
+                        m_chunk.meshGenJobHandle.Complete();
+
+                        m_chunk.generationPhase = GenerationPhase.OPEN_FOR_MESH_GEN;
+                        chunkDictionary[m_chunk.pos] = m_chunk;
+                    }
+
+                    m_chunks.Dispose();
+                }
+
+                
+
                 Vector2Int chunkPosVector2 = new Vector2Int(chunkPos.x * ChunkValues.WIDTH, chunkPos.y * ChunkValues.LENGTH);
                 if (Vector2.Distance(chunkPosVector2, new Vector2(player.position.x, player.position.z)) > blockRenderDistance)
                 {
-                    Destroy(chunkObjectDictionary[chunkPos]);
-                    chunkObjectDictionary.Remove(chunkPos);
-
-                    ChunkValues chunkValues = chunkDictionary[chunkPos];
-                    chunkDictionary.Remove(chunkPos);
-                    chunkValues.blocks.Dispose();
-
-                    chunkValues.terrainMeshValues.verts.Dispose();
-                    chunkValues.terrainMeshValues.tris.Dispose();
-                    chunkValues.terrainMeshValues.UVs.Dispose();
-                    chunkValues.terrainMeshValues.colors.Dispose();
-
-
-                    chunkValues.waterMeshValues.verts.Dispose();
-                    chunkValues.waterMeshValues.tris.Dispose();
-                    chunkValues.waterMeshValues.UVs.Dispose();
-                    chunkValues.waterMeshValues.colors.Dispose();
-
-
-                    bufferDictionary.TryGetValue(chunkPos, out BlockBufferValues blockBufferValues);
-                    BlockBufferValues bufferValues = blockBufferValues;
-                    bufferDictionary.Remove(chunkPos);
-                    bufferValues.blocks.Dispose();
+                    Chunk.DisposeOfChunk(chunkPos);
                 }
 
                 if (!CalculateIfInCameraFrustrum(Chunk.FindChunkCenter(chunkPos)))
@@ -232,6 +285,27 @@ namespace BloodyFish.UnityVoxelEngine.v2
                     Chunk.busyChunks.Dequeue();
                 }
             }
+        }
+
+        // We must dealocate everything ourselves when we quit the game
+        private void OnDisable()
+        {
+            print("Disposing Garbage");
+
+            foreach (int2 chunkPos in chunkObjectDictionary.Keys.ToList())
+            {
+                Chunk.DisposeOfChunk(chunkPos);
+            }
+
+            chunkDictionary.Dispose();
+            bufferDictionary.Dispose();
+
+            continentalness.Dispose();
+            heightFromContinentalness.Dispose();
+            biomeParams.Dispose();
+
+            Chunk.busyChunks.Dispose();
+            Block.possibleBlocks.Dispose();
         }
 
         [BurstCompile]

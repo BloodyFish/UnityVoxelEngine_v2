@@ -70,7 +70,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
         [BurstCompile]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void GenerateRightFace(ref MeshValues values, BlockData currentBlock, int x, int y, int z)
+        private static void GenerateRightFace(MeshValues values, BlockData currentBlock, int x, int y, int z)
         {
             int offset = values.verts.Length;
             Voxel_Verts.RightFace(ref values.verts, x, y, z);
@@ -81,7 +81,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
         [BurstCompile]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void GenerateLeftFace(ref MeshValues values, BlockData currentBlock, int x, int y, int z)
+        private static void GenerateLeftFace(MeshValues values, BlockData currentBlock, int x, int y, int z)
         {
             int offset = values.verts.Length;
             Voxel_Verts.LeftFace(ref values.verts, x, y, z);
@@ -92,7 +92,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
         [BurstCompile]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void GenerateFrontFace(ref MeshValues values, BlockData currentBlock, int x, int y, int z)
+        private static void GenerateFrontFace(MeshValues values, BlockData currentBlock, int x, int y, int z)
         {
             int offset = values.verts.Length;
             Voxel_Verts.FrontFace(ref values.verts, x, y, z);
@@ -103,7 +103,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
         [BurstCompile]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void GenerateBackFace(ref MeshValues values, BlockData currentBlock, int x, int y, int z)
+        private static void GenerateBackFace(MeshValues values, BlockData currentBlock, int x, int y, int z)
         {
             int offset = values.verts.Length;
             Voxel_Verts.BackFace(ref values.verts, x, y, z);
@@ -114,7 +114,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
         [BurstCompile]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void GenerateTopFace(ref MeshValues values, BlockData currentBlock, int x, int y, int z)
+        private static void GenerateTopFace(MeshValues values, BlockData currentBlock, int x, int y, int z)
         {
             int offset = values.verts.Length;
             Voxel_Verts.TopFace(ref values.verts, x, y, z);
@@ -125,7 +125,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
         [BurstCompile]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void GenerateBottomFace(ref MeshValues values, BlockData currentBlock, int x, int y, int z)
+        private static void GenerateBottomFace(MeshValues values, BlockData currentBlock, int x, int y, int z)
         {
             int offset = values.verts.Length;
             Voxel_Verts.BottomFace(ref values.verts, x, y, z);
@@ -135,7 +135,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
         }
 
         [BurstCompile]
-        public static ChunkValues GenerateMeshValues(ref ChunkValues chunkValues, NativeParallelHashMap<int2, ChunkValues> chunkDictionary, NativeArray<BlockData> possbleBlocks)
+        public static ChunkValues GenerateMeshValues(ChunkValues chunkValues, NativeParallelHashMap<int2, ChunkValues> chunkDictionary, NativeArray<BlockData> possbleBlocks)
         {
             MeshValues values = chunkValues.terrainMeshValues;
 
@@ -144,9 +144,9 @@ namespace BloodyFish.UnityVoxelEngine.v2
             values.UVs.Clear();
             values.colors.Clear();
 
-            int index = 0;
-            foreach (var i in chunkValues.blocks)
+            for(int index = 0; index < chunkValues.blocks.Length; index++)
             {
+                int i = chunkValues.blocks[index];
                 if (i > 0)
                 {
                     // The blocks in possibleBlocks should be sorted by their blockID.
@@ -166,7 +166,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
                         if (adjacentChunk.blocks.Length == 0)
                         {
-                            GenerateRightFace(ref values, currentBlock, x, y, z);
+                            GenerateRightFace(values, currentBlock, x, y, z);
 
                         }
                         else if (adjacentChunk.blocks.Length > 0)
@@ -176,7 +176,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
                             int adjacentBlockID = adjacentChunk.blocks[j];
                             if (adjacentBlockID <= 0 || Block.CheckTransparentBlockPlacement(currentBlock, possbleBlocks[adjacentBlockID - 1]))
                             {
-                                GenerateRightFace(ref values, currentBlock, x, y, z);
+                                GenerateRightFace(values, currentBlock, x, y, z);
                             }
                         }
                     }
@@ -187,7 +187,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
                         int adjacentBlockID = chunkValues.blocks[rightIndex];
                         if (adjacentBlockID <= 0 || Block.CheckTransparentBlockPlacement(currentBlock, possbleBlocks[adjacentBlockID - 1]))
                         {
-                            GenerateRightFace(ref values, currentBlock, x, y, z);
+                            GenerateRightFace(values, currentBlock, x, y, z);
                         }
                     }
 
@@ -197,7 +197,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
                         if (adjacentChunk.blocks.Length == 0)
                         {
-                            GenerateLeftFace(ref values, currentBlock, x, y, z);
+                            GenerateLeftFace(values, currentBlock, x, y, z);
 
                         }
                         else if (adjacentChunk.blocks.Length > 0)
@@ -207,7 +207,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
                             int adjacentBlockID = adjacentChunk.blocks[j];
                             if (adjacentBlockID <= 0 || Block.CheckTransparentBlockPlacement(currentBlock, possbleBlocks[adjacentBlockID - 1]))
                             {
-                                GenerateLeftFace(ref values, currentBlock, x, y, z);
+                                GenerateLeftFace(values, currentBlock, x, y, z);
                             }
                         }
 
@@ -220,7 +220,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
                         int adjacentBlockID = chunkValues.blocks[leftIndex];
                         if (adjacentBlockID <= 0 || Block.CheckTransparentBlockPlacement(currentBlock, possbleBlocks[adjacentBlockID - 1]))
                         {
-                            GenerateLeftFace(ref values, currentBlock, x, y, z);
+                            GenerateLeftFace(values, currentBlock, x, y, z);
                         }
                     }
 
@@ -231,7 +231,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
                         if (adjacentChunk.blocks.Length == 0)
                         {
-                            GenerateFrontFace(ref values, currentBlock, x, y, z);
+                            GenerateFrontFace(values, currentBlock, x, y, z);
                         }
 
                         else if (adjacentChunk.blocks.Length > 0)
@@ -242,7 +242,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
                             int adjacentBlockID = adjacentChunk.blocks[j];
                             if (adjacentBlockID <= 0 || Block.CheckTransparentBlockPlacement(currentBlock, possbleBlocks[adjacentBlockID - 1]))
                             {
-                                GenerateFrontFace(ref values, currentBlock, x, y, z);
+                                GenerateFrontFace(values, currentBlock, x, y, z);
                             }
                         }
 
@@ -255,7 +255,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
                         int adjacentBlockID = chunkValues.blocks[frontIndex];
                         if (adjacentBlockID <= 0 || Block.CheckTransparentBlockPlacement(currentBlock, possbleBlocks[adjacentBlockID - 1]))
                         {
-                            GenerateFrontFace(ref values, currentBlock, x, y, z);
+                            GenerateFrontFace(values, currentBlock, x, y, z);
                         }
                     }
 
@@ -265,7 +265,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
                         if (adjacentChunk.blocks.Length == 0)
                         {
-                            GenerateBackFace(ref values, currentBlock, x, y, z);
+                            GenerateBackFace(values, currentBlock, x, y, z);
                         }
 
                         else if (adjacentChunk.blocks.Length > 0)
@@ -275,7 +275,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
                             int adjacentBlockID = adjacentChunk.blocks[j];
                             if (adjacentBlockID <= 0 || Block.CheckTransparentBlockPlacement(currentBlock, possbleBlocks[adjacentBlockID - 1]))
                             {
-                                GenerateBackFace(ref values, currentBlock, x, y, z);
+                                GenerateBackFace(values, currentBlock, x, y, z);
 
                             }
                         }
@@ -289,7 +289,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
                         int adjacentBlockID = chunkValues.blocks[backIndex];
                         if (adjacentBlockID <= 0 || Block.CheckTransparentBlockPlacement(currentBlock, possbleBlocks[adjacentBlockID - 1]))
                         {
-                            GenerateBackFace(ref values, currentBlock, x, y, z);
+                            GenerateBackFace(values, currentBlock, x, y, z);
 
                         }
                     }
@@ -302,7 +302,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
                         int adjacentBlockID = chunkValues.blocks[topIndex];
                         if (adjacentBlockID <= 0 || Block.CheckTransparentBlockPlacement(currentBlock, possbleBlocks[adjacentBlockID - 1]))
                         {
-                            GenerateTopFace(ref values, currentBlock, x, y, z);
+                            GenerateTopFace(values, currentBlock, x, y, z);
 
                         }
                     }
@@ -314,12 +314,10 @@ namespace BloodyFish.UnityVoxelEngine.v2
                         int adjacentBlockID = chunkValues.blocks[bottomIndex];
                         if (adjacentBlockID <= 0 || Block.CheckTransparentBlockPlacement(currentBlock, possbleBlocks[adjacentBlockID - 1]))
                         {
-                            GenerateBottomFace(ref values, currentBlock, x, y, z);
+                            GenerateBottomFace(values, currentBlock, x, y, z);
                         }
                     }
                 }
-
-                index++;
             }
 
             chunkValues.terrainMeshValues = values;
@@ -327,7 +325,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
         }
 
         [BurstCompile]
-        public static ChunkValues GenerateMeshValuesWater(ref ChunkValues chunkValues, NativeParallelHashMap<int2, ChunkValues> chunkDictionary)
+        public static ChunkValues GenerateMeshValuesWater(ChunkValues chunkValues, NativeParallelHashMap<int2, ChunkValues> chunkDictionary)
         {
             MeshValues values = chunkValues.waterMeshValues;
 
@@ -335,9 +333,9 @@ namespace BloodyFish.UnityVoxelEngine.v2
             values.tris.Clear();
             values.UVs.Clear();
 
-            int index = 0;
-            foreach (var i in chunkValues.blocks)
+            for(int index = 0; index < chunkValues.blocks.Length; index++)
             {
+                int i = chunkValues.blocks[index];
                 if (i < 0)
                 {
                     int x = index % ChunkValues.WIDTH;
@@ -502,8 +500,6 @@ namespace BloodyFish.UnityVoxelEngine.v2
                         }
                     }
                 }
-
-                index++;
             }
 
             chunkValues.waterMeshValues = values;
