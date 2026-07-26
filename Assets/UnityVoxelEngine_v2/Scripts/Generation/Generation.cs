@@ -27,7 +27,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
         }
 
         [BurstCompile]
-        public static JobHandle GenTerrain(int2 worldSpaceChunkPos, ref NativeArray<short> blocks, ref Unity.Mathematics.Random random, out GenerateChunkValuesJob generationJob)
+        public static JobHandle GenTerrain(int2 worldSpaceChunkPos, NativeArray<short> blocks, ref Unity.Mathematics.Random random, out GenerateChunkValuesJob generationJob)
         {
             generationJob = new GenerateChunkValuesJob()
             {

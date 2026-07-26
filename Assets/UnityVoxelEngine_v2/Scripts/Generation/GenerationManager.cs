@@ -183,7 +183,11 @@ namespace BloodyFish.UnityVoxelEngine.v2
             foreach (int2 chunkPos in chunkObjectDictionary.Keys.ToList())
             {
                 chunkDictionary.TryGetValue(chunkPos, out ChunkValues chunk);
-                if (chunk.generationPhase == GenerationPhase.IS_GEN_TERRAIN && chunk.treeGenJobHandle.IsCompleted)
+                
+                // Routinely check if treeGenJobHandle is complete
+                if (chunk.generationPhase == GenerationPhase.IS_GEN_TERRAIN && 
+                    chunk.treeGenJob.blocks.IsCreated && 
+                    chunk.treeGenJobHandle.IsCompleted)
                 {
                     chunk.treeGenJobHandle.Complete();
                     chunk.blocks = new NativeArray<short>(chunk.treeGenJob.blocks, Allocator.Persistent);
@@ -202,7 +206,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
 
                     // Cycle through possible neighbors and add them to "chunks"
-                    // NOTE: one of the offsets is int(0, 0) whihc includes the current chunk
+                    // NOTE: one of the offsets is int(0, 0) which includes the current chunk
                     for (int i = 0; i < Chunk.offsets.Length; i++)
                     {
                         if (chunkDictionary.TryGetValue(chunk.pos + Chunk.offsets[i], out ChunkValues neighbor) && (neighbor.blocks.Length > 0 || bufferDictionary[chunk.pos + Chunk.offsets[i]].blocks.Length > 0))
@@ -239,7 +243,9 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 }
 
                 NativeList<ChunkValues> m_chunks = chunk.meshGenJob.chunkValsArray;
-                if (chunk.generationPhase == GenerationPhase.IS_GEN_MESH_VALUES && chunk.meshGenJobHandle.IsCompleted && m_chunks.IsCreated)
+                if (chunk.generationPhase == GenerationPhase.IS_GEN_MESH_VALUES && 
+                    m_chunks.IsCreated && 
+                    chunk.meshGenJobHandle.IsCompleted)
                 {
                     for(int i = 0; i < chunk.meshGenJob.chunkValsArray.Length; i++)
                     {

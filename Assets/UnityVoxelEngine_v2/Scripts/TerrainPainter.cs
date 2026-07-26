@@ -10,7 +10,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
     public class TerrainPainter
     {
         [BurstCompile]
-        public static JobHandle Paint(int2 worldSpaceChunkPos, int2 chunkPos, ref NativeArray<short> blocks, ref Unity.Mathematics.Random random, JobHandle dependency, out TerrainPaintJob paintJob)
+        public static JobHandle Paint(int2 worldSpaceChunkPos, int2 chunkPos, NativeArray<short> blocks, ref Unity.Mathematics.Random random, JobHandle dependency, out TerrainPaintJob paintJob)
         {
             paintJob = new TerrainPaintJob()
             {
@@ -39,7 +39,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
         // We need to pass random by reference or else it will reset each time, making it look like no randomness is applied
         [BurstCompile]
         public static void PaintTerrain(ref Unity.Mathematics.Random random, int i, int2 chunkPos, int3 blockPos, 
-            ref NativeArray<short> blocks,
+            NativeArray<short> blocks,
             BiomeParameters biomeParam,
             NativeParallelHashMap<int2, BlockBufferValues> bufferDictionary,
             NativeParallelHashMap<int2, ChunkValues> chunkDictionary)
@@ -85,7 +85,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
         [BurstCompile]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void FillWater(int i, int2 chunkPos, int3 blockPos,
-            ref NativeArray<short> blocks,
+            NativeArray<short> blocks,
             NativeParallelHashMap<int2, BlockBufferValues> bufferDictionary,
             NativeParallelHashMap<int2, ChunkValues> chunkDictionary)
         {
@@ -155,8 +155,8 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
                 int3 blockPos = new int3(x, y, z);
 
-                TerrainPainter.PaintTerrain(ref random, id, chunkPos, blockPos, ref blocks, biomeParams[biomeID], bufferDictionary, chunkDictionary);
-                TerrainPainter.FillWater(id, chunkPos, blockPos, ref blocks, bufferDictionary, chunkDictionary);
+                TerrainPainter.PaintTerrain(ref random, id, chunkPos, blockPos, blocks, biomeParams[biomeID], bufferDictionary, chunkDictionary);
+                TerrainPainter.FillWater(id, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary);
             }
 
         }

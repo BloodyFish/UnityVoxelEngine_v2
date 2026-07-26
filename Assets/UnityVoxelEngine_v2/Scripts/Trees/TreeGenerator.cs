@@ -11,7 +11,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
     {
 
         [BurstCompile]
-        public static JobHandle PlantTrees(int2 worldSpaceChunkPos, int2 chunkPos, ref NativeArray<short> blocks, ref Unity.Mathematics.Random random, JobHandle dependency, out TreeGenJob treeGenJob)
+        public static JobHandle PlantTrees(int2 worldSpaceChunkPos, int2 chunkPos, NativeArray<short> blocks, ref Unity.Mathematics.Random random, JobHandle dependency, out TreeGenJob treeGenJob)
         {
             treeGenJob = new TreeGenJob()
             {

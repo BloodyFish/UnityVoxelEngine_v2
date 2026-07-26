@@ -165,9 +165,10 @@ namespace BloodyFish.UnityVoxelEngine.v2
             chunkVals.random = new Unity.Mathematics.Random((uint)(GenerationManager.seed ^ pos.x ^ pos.y * int.MaxValue));
             chunkVals.generationPhase = GenerationPhase.IS_GEN_TERRAIN;
 
-            JobHandle generationJobHandle = Generation.GenTerrain(chunkVals.worldSpacePos, ref chunkVals.blocks, ref chunkVals.random, out GenerateChunkValuesJob generationJob);
-            JobHandle paintJobHandle = TerrainPainter.Paint(chunkVals.worldSpacePos, pos, ref chunkVals.blocks, ref chunkVals.random, generationJobHandle, out TerrainPaintJob paintJob);
-            JobHandle treeGenJobHandle = TreeGenerator.PlantTrees(chunkVals.worldSpacePos, pos, ref chunkVals.blocks, ref chunkVals.random, paintJobHandle, out TreeGenJob treeGenJob);
+            // We don't need to pass in chunkVals.blocks as ref since even though NativeArrays aren't passed by reference, each index is a pointer, so accessing each index is the same
+            JobHandle generationJobHandle = Generation.GenTerrain(chunkVals.worldSpacePos, chunkVals.blocks, ref chunkVals.random, out GenerateChunkValuesJob generationJob);
+            JobHandle paintJobHandle = TerrainPainter.Paint(chunkVals.worldSpacePos, pos, chunkVals.blocks, ref chunkVals.random, generationJobHandle, out TerrainPaintJob paintJob);
+            JobHandle treeGenJobHandle = TreeGenerator.PlantTrees(chunkVals.worldSpacePos, pos, chunkVals.blocks, ref chunkVals.random, paintJobHandle, out TreeGenJob treeGenJob);
 
             // We only need to track the last job in the dependency chain
             chunkVals.treeGenJobHandle = treeGenJobHandle;
@@ -180,7 +181,6 @@ namespace BloodyFish.UnityVoxelEngine.v2
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void MergeBlockBuffer(int2 chunkPos, NativeArray<short> blocks)
         {
-
             if(GenerationManager.bufferDictionary.TryGetValue(chunkPos, out BlockBufferValues blockBuffer))
             {
                 for (int i = 0; i < blocks.Length; i++)
@@ -300,29 +300,32 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
         public static void DisposeOfChunk(int2 chunkPos)
         {
-            ChunkValues chunkValues = GenerationManager.chunkDictionary[chunkPos];
-            GenerationManager.chunkDictionary.Remove(chunkPos);
+            if(GenerationManager.chunkDictionary.TryGetValue(chunkPos, out ChunkValues chunkValues))
+            {
+                GenerationManager.chunkDictionary.Remove(chunkPos);
 
-            chunkValues.treeGenJobHandle.Complete();
-            chunkValues.meshGenJobHandle.Complete();
-            chunkValues.blocks.Dispose();
+                chunkValues.treeGenJobHandle.Complete();
+                chunkValues.meshGenJobHandle.Complete();
+                chunkValues.blocks.Dispose();
 
-            chunkValues.terrainMeshValues.verts.Dispose();
-            chunkValues.terrainMeshValues.tris.Dispose();
-            chunkValues.terrainMeshValues.UVs.Dispose();
-            chunkValues.terrainMeshValues.colors.Dispose();
-
-
-            chunkValues.waterMeshValues.verts.Dispose();
-            chunkValues.waterMeshValues.tris.Dispose();
-            chunkValues.waterMeshValues.UVs.Dispose();
-            chunkValues.waterMeshValues.colors.Dispose();
+                chunkValues.terrainMeshValues.verts.Dispose();
+                chunkValues.terrainMeshValues.tris.Dispose();
+                chunkValues.terrainMeshValues.UVs.Dispose();
+                chunkValues.terrainMeshValues.colors.Dispose();
 
 
-            GenerationManager.bufferDictionary.TryGetValue(chunkPos, out BlockBufferValues blockBufferValues);
-            BlockBufferValues bufferValues = blockBufferValues;
-            GenerationManager.bufferDictionary.Remove(chunkPos);
-            bufferValues.blocks.Dispose();
+                chunkValues.waterMeshValues.verts.Dispose();
+                chunkValues.waterMeshValues.tris.Dispose();
+                chunkValues.waterMeshValues.UVs.Dispose();
+                chunkValues.waterMeshValues.colors.Dispose();
+            }
+ 
+            if(GenerationManager.bufferDictionary.TryGetValue(chunkPos, out BlockBufferValues blockBufferValues))
+            {
+                BlockBufferValues bufferValues = blockBufferValues;
+                GenerationManager.bufferDictionary.Remove(chunkPos);
+                bufferValues.blocks.Dispose();
+            }
         }
     }
 }
