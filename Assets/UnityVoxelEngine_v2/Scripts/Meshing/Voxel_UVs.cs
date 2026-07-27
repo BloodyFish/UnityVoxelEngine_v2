@@ -14,7 +14,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 
         // It's a lot faster to pass in a list and add to it then creating a new list and instantiating it with stuff
-        public static NativeList<float2> GetUVs(NativeList<float2> uvs, float x, float y, float size)
+        public static void GetUVs(ref NativeList<float2> uvs, float x, float y, float size)
         {
             // The coordinates of our texture atlas are as follows:
             // TOP LEFT = (0, 1)
@@ -40,8 +40,6 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
             // BOTTOM RIGHT
             uvs.Add(new Vector2(x1, y0));
-            
-            return uvs;
         }
     }
 }

@@ -247,7 +247,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 // If currentChunk is null create block buffer and add blocks to that!
                 // We also need to check if currentChunk is generating terrain. If it is, and we add blocks directly to the chunk before painting,
                 // the leaves will be painted over!
-                if (!exists || currentChunk.generationPhase != GenerationPhase.IDLE)
+                if (!exists || currentChunk.generationPhase < GenerationPhase.IDLE)
                 {   
                     // We created the buffer in Chunk.CreateChunk() so we should be able to get it here
                     if(bufferDictionary.TryGetValue(possibleChunkPos, out BlockBufferValues bufferVals))
