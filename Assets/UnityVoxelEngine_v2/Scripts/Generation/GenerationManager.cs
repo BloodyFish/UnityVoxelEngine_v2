@@ -244,8 +244,8 @@ namespace BloodyFish.UnityVoxelEngine.v2
 
                 NativeList<ChunkValues> m_chunks = chunk.meshGenJob.chunkValsArray;
                 if (chunk.generationPhase == GenerationPhase.IS_GEN_MESH_VALUES && 
-                    m_chunks.IsCreated && 
-                    chunk.meshGenJobHandle.IsCompleted)
+                    chunk.meshGenJobHandle.IsCompleted && 
+                    m_chunks.IsCreated)
                 {
                     for(int i = 0; i < chunk.meshGenJob.chunkValsArray.Length; i++)
                     {
@@ -408,11 +408,6 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 
                 do
                 {
-                    /*if(chunkDictionary.TryGetValue(potentialNeighborPos, out ChunkValues chunk) && !Chunk.BusyChunkContains(potentialNeighborPos) && chunk.generationPhase == GenerationPhase.OPEN_FOR_MESH_GEN)
-                    {       
-                        Chunk.Meshify(ref chunk);
-                    }*/
-
                     if (!CalculateIfInCameraFrustrum(Chunk.FindChunkCenter(potentialNeighborPos))
                     || Vector2.Distance(new Vector2(potentialNeighborPos.x * ChunkValues.WIDTH, potentialNeighborPos.y * ChunkValues.LENGTH), playerPos) > blockRenderDistance)
                     {

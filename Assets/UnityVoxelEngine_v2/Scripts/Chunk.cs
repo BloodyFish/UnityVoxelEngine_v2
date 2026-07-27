@@ -132,8 +132,8 @@ namespace BloodyFish.UnityVoxelEngine.v2
             waterObj.transform.parent = chunkObj.transform;
 
 
-            GenerationManager.chunkObjectDictionary.Add(pos, chunkObj);
-            GenerationManager.chunkDictionary.Add(pos, chunkVals);
+            GenerationManager.chunkObjectDictionary.TryAdd(pos, chunkObj);
+            GenerationManager.chunkDictionary.TryAdd(pos, chunkVals);
 
             // Create Block Buffer for neighboring chunks since we can't create Persistent NativeArrays in jobs
             for(int i = 1; i < offsets.Length; i++)
@@ -250,7 +250,10 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 if (!exists || currentChunk.generationPhase != GenerationPhase.IDLE)
                 {   
                     // We created the buffer in Chunk.CreateChunk() so we should be able to get it here
-                    blocks = bufferDictionary[possibleChunkPos].blocks;
+                    if(bufferDictionary.TryGetValue(possibleChunkPos, out BlockBufferValues bufferVals))
+                    {
+                        blocks = bufferVals.blocks;
+                    }
                 }
             }
         }
@@ -290,12 +293,13 @@ namespace BloodyFish.UnityVoxelEngine.v2
         {
             chunkVals.generationPhase = GenerationPhase.IS_GEN_MESH;
 
-            GameObject chunkObj = GenerationManager.chunkObjectDictionary[chunkVals.pos];
+            if(GenerationManager.chunkObjectDictionary.TryGetValue(chunkVals.pos, out GameObject chunkObj))
+            {
+                Mesher.Meshify(chunkObj, chunkVals.terrainMeshValues);
+                Mesher.Meshify(chunkObj.transform.GetChild(0).gameObject, chunkVals.waterMeshValues);
 
-            Mesher.Meshify(chunkObj, chunkVals.terrainMeshValues);
-            Mesher.Meshify(chunkObj.transform.GetChild(0).gameObject, chunkVals.waterMeshValues);
-
-            chunkVals.generationPhase = GenerationPhase.IDLE;
+                chunkVals.generationPhase = GenerationPhase.IDLE;
+            }
         }
 
         public static void DisposeOfChunk(int2 chunkPos)
@@ -322,9 +326,8 @@ namespace BloodyFish.UnityVoxelEngine.v2
  
             if(GenerationManager.bufferDictionary.TryGetValue(chunkPos, out BlockBufferValues blockBufferValues))
             {
-                BlockBufferValues bufferValues = blockBufferValues;
                 GenerationManager.bufferDictionary.Remove(chunkPos);
-                bufferValues.blocks.Dispose();
+                blockBufferValues.blocks.Dispose();
             }
         }
     }

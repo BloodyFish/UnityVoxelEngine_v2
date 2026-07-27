@@ -9,7 +9,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
 {
     public struct BlockData
     {
-        [HideInInspector] public short blockID;
+        public short blockID;
         public Color tint;
 
         public Vector2Int texCoord_front;
@@ -29,7 +29,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
     {
         public string blockName;
 
-        public short blockID;
+        [HideInInspector] public short blockID;
         public Color32 tint;
 
         public Vector2Int texCoord_front;
