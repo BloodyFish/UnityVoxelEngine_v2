@@ -238,15 +238,13 @@ namespace BloodyFish.UnityVoxelEngine.v2
                         chunks[i] = m_chunk;
                         chunkDictionary[m_chunk.pos] = m_chunk;
                     }
-
-                    chunkDictionary[chunkPos] = chunk;
                 }
 
-                NativeList<ChunkValues> m_chunks = chunk.meshGenJob.chunkValsArray;
                 if (chunk.generationPhase == GenerationPhase.IS_GEN_MESH_VALUES && 
                     chunk.meshGenJobHandle.IsCompleted && 
-                    m_chunks.IsCreated)
+                    chunk.meshGenJob.chunkValsArray.IsCreated)
                 {
+                    NativeList<ChunkValues> m_chunks = chunk.meshGenJob.chunkValsArray;
                     for(int i = 0; i < chunk.meshGenJob.chunkValsArray.Length; i++)
                     {
                         ChunkValues m_chunk = m_chunks[i];
@@ -365,7 +363,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
                     Gizmos.color = Color.green;
                 }
                 Gizmos.DrawWireCube(Chunk.FindChunkCenter(chunkPos), size);
-            }*/ 
+            }*/
         }
 
         IEnumerator GenerateChunk()
