@@ -89,6 +89,26 @@ namespace BloodyFish.UnityVoxelEngine.v2
             return new Vector3((chunkPos.x * ChunkValues.WIDTH) + ChunkValues.WIDTH / 2, ChunkValues.HEIGHT / 2, (chunkPos.y * ChunkValues.LENGTH) + ChunkValues.LENGTH / 2);
         } 
 
+        [BurstCompile]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool CalculateIfInRenderDistance(int2 chunkPos, float2 playerPos, int renderDistance)
+        {
+            // Use the distance formula
+            float x1 = chunkPos.x * ChunkValues.WIDTH;
+            float x2 = playerPos.x;
+
+            float y1 = chunkPos.y * ChunkValues.LENGTH;
+            float y2 = playerPos.y;
+
+            float distance = math.sqrt(math.square(x2 - x1) + math.square(y2 - y1));
+            if(distance <= renderDistance)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         public static ChunkValues CreateChunk(int2 pos)
         {
             ChunkValues chunkVals = new ChunkValues();

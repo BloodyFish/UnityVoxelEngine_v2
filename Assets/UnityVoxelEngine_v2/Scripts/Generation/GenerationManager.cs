@@ -260,7 +260,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 
 
                 Vector2Int chunkPosVector2 = new Vector2Int(chunkPos.x * ChunkValues.WIDTH, chunkPos.y * ChunkValues.LENGTH);
-                if (Vector2.Distance(chunkPosVector2, new Vector2(player.position.x, player.position.z)) > blockRenderDistance)
+                if (!Chunk.CalculateIfInRenderDistance(chunkPos, new float2(player.position.x, player.position.z), blockRenderDistance))
                 {
                     Chunk.DisposeOfChunk(chunkPos);
                 }
@@ -284,7 +284,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
             for(int i = 0; i < Chunk.busyChunks.Count; i++)
             {
                 int2 chunkPos = Chunk.busyChunks.Peek();
-                if(Vector2.Distance(new Vector2Int(chunkPos.x * ChunkValues.WIDTH, chunkPos.y * ChunkValues.WIDTH), new Vector2(player.position.x, player.position.z)) > blockRenderDistance)
+                if(!Chunk.CalculateIfInRenderDistance(chunkPos, new float2(player.position.x, player.position.z), blockRenderDistance))
                 {
                     Chunk.busyChunks.Dequeue();
                 }
@@ -355,15 +355,19 @@ namespace BloodyFish.UnityVoxelEngine.v2
             }
 
             // FOR TESTING PURPOSES:
-            /*Gizmos.color = Color.powderBlue;
-            foreach(int2 chunkPos in Chunk.busyChunks.ToArray(Allocator.Temp))
+            Gizmos.color = Color.powderBlue;
+            if (Chunk.busyChunks.IsCreated)
             {
-                if(chunkDictionary.TryGetValue(chunkPos, out ChunkValues chunk) && chunk.generationPhase == GenerationPhase.OPEN_FOR_MESH_GEN)
+                foreach(int2 chunkPos in Chunk.busyChunks.ToArray(Allocator.Temp))
                 {
-                    Gizmos.color = Color.green;
+                    if(chunkDictionary.TryGetValue(chunkPos, out ChunkValues chunk) && chunk.generationPhase == GenerationPhase.OPEN_FOR_MESH_GEN)
+                    {
+                        Gizmos.color = Color.green;
+                    }
+
+                    Gizmos.DrawWireCube(Chunk.FindChunkCenter(chunkPos), size);
                 }
-                Gizmos.DrawWireCube(Chunk.FindChunkCenter(chunkPos), size);
-            }*/
+            }
         }
 
         IEnumerator GenerateChunk()
@@ -381,7 +385,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 // Even though we did all these checks in GetValidMembers, we need to check again here because the player may have moved since the chunk was added to the queue
                 if (!chunkDictionary.ContainsKey(chunkPos) 
                     && CalculateIfInCameraFrustrum(Chunk.FindChunkCenter(chunkPos))
-                    && Vector2.Distance(new Vector2(chunkPos.x * ChunkValues.WIDTH, chunkPos.y * ChunkValues.LENGTH), playerPos) <= blockRenderDistance)
+                    && Chunk.CalculateIfInRenderDistance(chunkPos, new float2(player.position.x, player.position.z), blockRenderDistance))
                 {
                     // Create the chunk and generate it
                     ChunkValues chunk = Chunk.CreateChunk(chunkPos);
@@ -407,7 +411,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 do
                 {
                     if (!CalculateIfInCameraFrustrum(Chunk.FindChunkCenter(potentialNeighborPos))
-                    || Vector2.Distance(new Vector2(potentialNeighborPos.x * ChunkValues.WIDTH, potentialNeighborPos.y * ChunkValues.LENGTH), playerPos) > blockRenderDistance)
+                    || !Chunk.CalculateIfInRenderDistance(chunkPos, new float2(player.position.x, player.position.z), blockRenderDistance))
                     {
                         isValid = false;
                         break;
@@ -448,8 +452,11 @@ namespace BloodyFish.UnityVoxelEngine.v2
                             continue;
                         }
     
-
-                        Chunk.busyChunks.Enqueue(chunkPos);
+                        
+                        if(Chunk.CalculateIfInRenderDistance(chunkPos, new float2(player.position.x, player.position.z), blockRenderDistance))
+                        {
+                            Chunk.busyChunks.Enqueue(chunkPos);
+                        }
                     }
                 }
                 yield return null;
