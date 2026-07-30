@@ -184,81 +184,9 @@ namespace BloodyFish.UnityVoxelEngine.v2
             {
                 chunkDictionary.TryGetValue(chunkPos, out ChunkValues chunk);
                 
-                // Routinely check if treeGenJobHandle is complete
-                if (chunk.generationPhase == GenerationPhase.IS_GEN_TERRAIN && 
-                    chunk.treeGenJob.blocks.IsCreated && 
-                    chunk.treeGenJobHandle.IsCompleted)
-                {
-                    chunk.treeGenJobHandle.Complete();
-                    chunk.blocks = new NativeArray<short>(chunk.treeGenJob.blocks, Allocator.Persistent);
-                    chunk.treeGenJob.blocks.Dispose();
-
-                    chunk.generationPhase = GenerationPhase.DONE_GEN_TERRAIN;
-                    chunkDictionary[chunkPos] = chunk;
-
-                    Chunk.busyChunks.Enqueue(chunkPos);
-
-                    //print(chunk.blocks.Length);
-
-
-                    NativeList<ChunkValues> chunks = new NativeList<ChunkValues>(0, Allocator.Persistent);
-                    NativeArray<int2> busyChunksArray = Chunk.busyChunks.ToArray(Allocator.Temp);
-
-
-                    // Cycle through possible neighbors and add them to "chunks"
-                    // NOTE: one of the offsets is int(0, 0) which includes the current chunk
-                    for (int i = 0; i < Chunk.offsets.Length; i++)
-                    {
-                        if (chunkDictionary.TryGetValue(chunk.pos + Chunk.offsets[i], out ChunkValues neighbor) && (neighbor.blocks.Length > 0 || bufferDictionary[chunk.pos + Chunk.offsets[i]].blocks.Length > 0))
-                        {
-                            // We only want to mesh neighbors that are done generating terrain (or are at a further stage)
-                            if(neighbor.generationPhase >= GenerationPhase.DONE_GEN_TERRAIN)
-                            {
-                                // We call MergeBlockBuffer() here so that any last minute additions to the buffer can be accounted for
-                                Chunk.MergeBlockBuffer(neighbor.pos, neighbor.blocks);
-                                neighbor.generationPhase = GenerationPhase.IS_GEN_MESH_VALUES;
-                                chunkDictionary[neighbor.pos] = neighbor;
-                                chunks.Add(neighbor);
-
-                                if (!busyChunksArray.Contains(neighbor.pos))
-                                {
-                                    Chunk.busyChunks.Enqueue(neighbor.pos);
-                                }
-                            }
-                        }
-                    }
-
-                    JobHandle meshGenHandle = Generation.StartMeshGen(chunks, chunk.treeGenJobHandle, out StartMeshGenJob meshGenJob);
-
-                    for(int i = 0; i < chunks.Length; i++)
-                    {
-                        ChunkValues m_chunk = chunks[i];
-                        m_chunk.meshGenJobHandle = meshGenHandle;
-                        m_chunk.meshGenJob = meshGenJob;
-                        chunks[i] = m_chunk;
-                        chunkDictionary[m_chunk.pos] = m_chunk;
-                    }
-                }
-
-                if (chunk.generationPhase == GenerationPhase.IS_GEN_MESH_VALUES && 
-                    chunk.meshGenJobHandle.IsCompleted && 
-                    chunk.meshGenJob.chunkValsArray.IsCreated)
-                {
-                    NativeList<ChunkValues> m_chunks = chunk.meshGenJob.chunkValsArray;
-                    for(int i = 0; i < chunk.meshGenJob.chunkValsArray.Length; i++)
-                    {
-                        ChunkValues m_chunk = m_chunks[i];
-                        m_chunk.meshGenJobHandle.Complete();
-
-                        m_chunk.generationPhase = GenerationPhase.OPEN_FOR_MESH_GEN;
-                        chunkDictionary[m_chunk.pos] = m_chunk;
-                    }
-
-                    m_chunks.Dispose();
-                }
-
+                Chunk.TerminateTerrainGeneration(chunkPos, chunk);
+                Chunk.TerminateMeshValueGeneration(chunk);
                 
-
                 Vector2Int chunkPosVector2 = new Vector2Int(chunkPos.x * ChunkValues.WIDTH, chunkPos.y * ChunkValues.LENGTH);
                 if (!Chunk.CalculateIfInRenderDistance(chunkPos, new float2(player.position.x, player.position.z), blockRenderDistance))
                 {
@@ -272,13 +200,18 @@ namespace BloodyFish.UnityVoxelEngine.v2
                         chunkObj.GetComponent<MeshRenderer>().enabled = false;
                         chunkObj.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
                     }
-
                 }
                 else if (chunkObjectDictionary.TryGetValue(chunkPos, out GameObject chunkObj))
                 {
+                    if(chunk.generationPhase == GenerationPhase.OPEN_FOR_MESH_GEN && 
+                       !Chunk.busyChunks.ToArray(Allocator.Temp).Contains(chunkPos))
+                    {
+                        Chunk.busyChunks.Enqueue(chunkPos);
+                    }
+
                     chunkObj.GetComponent<MeshRenderer>().enabled = true;
                     chunkObj.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;
-                }
+                }       
             }
 
             for(int i = 0; i < Chunk.busyChunks.Count; i++)
@@ -398,6 +331,8 @@ namespace BloodyFish.UnityVoxelEngine.v2
             }
         }
 
+        // Note that even if it could be usefull to do things to the chunks we encounter during the execution of this method,
+        // this method should be used ONLY for the purpose it is intended for
         IEnumerator GetValidMembers(int2 chunkPos, Vector2 playerPos)
         {
             foreach(int2 offset in offsets)
@@ -446,17 +381,16 @@ namespace BloodyFish.UnityVoxelEngine.v2
                         Chunk.busyChunks.TryDequeue(out chunkPos);
                         if (CalculateIfInCameraFrustrum(Chunk.FindChunkCenter(chunkPos)) && chunk.generationPhase == GenerationPhase.OPEN_FOR_MESH_GEN)
                         {
-                            Chunk.Meshify(ref chunk);
+                            Chunk.Meshify(chunk);
                             
                             yield return null;
                             continue;
                         }
-    
-                        
-                        if(Chunk.CalculateIfInRenderDistance(chunkPos, new float2(player.position.x, player.position.z), blockRenderDistance))
+           
+                        /*if(Chunk.CalculateIfInRenderDistance(chunkPos, new float2(player.position.x, player.position.z), blockRenderDistance) && CalculateIfInCameraFrustrum(Chunk.FindChunkCenter(chunkPos)))
                         {
                             Chunk.busyChunks.Enqueue(chunkPos);
-                        }
+                        }*/
                     }
                 }
                 yield return null;

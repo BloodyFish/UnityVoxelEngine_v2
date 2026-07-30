@@ -267,13 +267,17 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 // If currentChunk is null create block buffer and add blocks to that!
                 // We also need to check if currentChunk is generating terrain. If it is, and we add blocks directly to the chunk before painting,
                 // the leaves will be painted over!
-                if (!exists || currentChunk.generationPhase < GenerationPhase.IDLE)
+                //if (!exists || currentChunk.generationPhase <= GenerationPhase.IDLE)
+                if(!exists)
                 {   
-                    // We created the buffer in Chunk.CreateChunk() so we should be able to get it here
                     if(bufferDictionary.TryGetValue(possibleChunkPos, out BlockBufferValues bufferVals))
                     {
                         blocks = bufferVals.blocks;
                     }
+                }
+                else
+                {
+                    blocks = currentChunk.blocks;
                 }
             }
         }
@@ -307,11 +311,91 @@ namespace BloodyFish.UnityVoxelEngine.v2
             }
         }
 
+        [BurstCompile]
+        public static void TerminateTerrainGeneration(int2 chunkPos, ChunkValues chunk)
+        {
+            // Routinely check if treeGenJobHandle is complete
+            if (chunk.generationPhase == GenerationPhase.IS_GEN_TERRAIN && 
+                chunk.treeGenJob.blocks.IsCreated && 
+                chunk.treeGenJobHandle.IsCompleted)
+            {
+                chunk.treeGenJobHandle.Complete();
+                chunk.blocks = new NativeArray<short>(chunk.treeGenJob.blocks, Allocator.Persistent);
+                chunk.treeGenJob.blocks.Dispose();
+
+                chunk.generationPhase = GenerationPhase.DONE_GEN_TERRAIN;
+                GenerationManager.chunkDictionary[chunkPos] = chunk;
+
+                busyChunks.Enqueue(chunkPos);
+
+                //print(chunk.blocks.Length);
+
+                NativeList<ChunkValues> chunks = new NativeList<ChunkValues>(0, Allocator.Persistent);
+                NativeArray<int2> busyChunksArray = busyChunks.ToArray(Allocator.Temp);
+
+                // Cycle through possible neighbors and add them to "chunks"
+                // NOTE: one of the offsets is int(0, 0) which includes the current chunk
+                for (int i = 0; i < offsets.Length; i++)
+                {
+                    if (GenerationManager.chunkDictionary.TryGetValue(chunk.pos + Chunk.offsets[i], out ChunkValues neighbor) && (neighbor.blocks.Length > 0 || GenerationManager.bufferDictionary[chunk.pos + offsets[i]].blocks.Length > 0))
+                    {
+                        // We only want to mesh neighbors that are done generating terrain (or are at a further stage)
+                        if(neighbor.generationPhase >= GenerationPhase.DONE_GEN_TERRAIN)
+                        {
+                            // We call MergeBlockBuffer() here so that any last minute additions to the buffer can be accounted for
+                            MergeBlockBuffer(neighbor.pos, neighbor.blocks);
+                            neighbor.generationPhase = GenerationPhase.IS_GEN_MESH_VALUES;
+                            GenerationManager.chunkDictionary[neighbor.pos] = neighbor;
+                            chunks.Add(neighbor);
+
+                            if (!busyChunksArray.Contains(neighbor.pos))
+                            {
+                                busyChunks.Enqueue(neighbor.pos);
+                            }
+                        }
+                    }
+                }
+
+                JobHandle meshGenHandle = Generation.StartMeshGen(chunks, chunk.treeGenJobHandle, out StartMeshGenJob meshGenJob);
+
+                for(int i = 0; i < chunks.Length; i++)
+                {
+                    ChunkValues m_chunk = chunks[i];
+                    m_chunk.meshGenJobHandle = meshGenHandle;
+                    m_chunk.meshGenJob = meshGenJob;
+                    chunks[i] = m_chunk;
+                    GenerationManager.chunkDictionary[m_chunk.pos] = m_chunk;
+                }
+            }
+        }
+
+        [BurstCompile]
+        public static void TerminateMeshValueGeneration(ChunkValues chunk)
+        {
+            if (chunk.generationPhase == GenerationPhase.IS_GEN_MESH_VALUES && 
+                chunk.meshGenJobHandle.IsCompleted && 
+                chunk.meshGenJob.chunkValsArray.IsCreated)
+            {
+                NativeList<ChunkValues> m_chunks = chunk.meshGenJob.chunkValsArray;
+                for(int i = 0; i < chunk.meshGenJob.chunkValsArray.Length; i++)
+                {
+                    ChunkValues m_chunk = m_chunks[i];
+                    m_chunk.meshGenJobHandle.Complete();
+
+                    m_chunk.generationPhase = GenerationPhase.OPEN_FOR_MESH_GEN;
+                    GenerationManager.chunkDictionary[m_chunk.pos] = m_chunk;
+                }
+
+                m_chunks.Dispose();
+            }
+        }
+
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Meshify(ref ChunkValues chunkVals)
+        public static void Meshify(ChunkValues chunkVals)
         {
             chunkVals.generationPhase = GenerationPhase.IS_GEN_MESH;
+            GenerationManager.chunkDictionary[chunkVals.pos] = chunkVals;
 
             if(GenerationManager.chunkObjectDictionary.TryGetValue(chunkVals.pos, out GameObject chunkObj))
             {
@@ -319,6 +403,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
                 Mesher.Meshify(chunkObj.transform.GetChild(0).gameObject, chunkVals.waterMeshValues);
 
                 chunkVals.generationPhase = GenerationPhase.IDLE;
+                GenerationManager.chunkDictionary[chunkVals.pos] = chunkVals;
             }
         }
 
