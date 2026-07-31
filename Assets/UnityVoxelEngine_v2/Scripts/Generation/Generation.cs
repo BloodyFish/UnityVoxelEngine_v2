@@ -4,7 +4,6 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
-using UnityEngine.InputSystem.Interactions;
 
 
 namespace BloodyFish.UnityVoxelEngine.v2

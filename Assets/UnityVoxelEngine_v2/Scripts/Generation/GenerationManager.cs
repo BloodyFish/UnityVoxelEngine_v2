@@ -386,11 +386,6 @@ namespace BloodyFish.UnityVoxelEngine.v2
                             yield return null;
                             continue;
                         }
-           
-                        /*if(Chunk.CalculateIfInRenderDistance(chunkPos, new float2(player.position.x, player.position.z), blockRenderDistance) && CalculateIfInCameraFrustrum(Chunk.FindChunkCenter(chunkPos)))
-                        {
-                            Chunk.busyChunks.Enqueue(chunkPos);
-                        }*/
                     }
                 }
                 yield return null;

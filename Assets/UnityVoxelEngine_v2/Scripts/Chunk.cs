@@ -213,6 +213,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
                     }
                 }
 
+                GenerationManager.bufferDictionary[chunkPos].blocks.Dispose();
                 GenerationManager.bufferDictionary.Remove(chunkPos);
             }
         }
