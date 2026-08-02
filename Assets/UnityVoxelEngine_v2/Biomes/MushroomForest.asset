@@ -20,7 +20,7 @@ MonoBehaviour:
   minTemp: 13
   maxTemp: 24
   minPreciptation: 75
-  maxPreciptation: 100
+  maxPreciptation: 150
   treeDenisty: 150
   trees:
   - {fileID: 11400000, guid: f292a9ce0d3e4174f925d5d2f42edbb2, type: 2}
