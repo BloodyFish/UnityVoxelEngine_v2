@@ -5,7 +5,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace BloodyFish.UnityVoxelEngine.v2
+namespace BloodyFish.UnityVoxelEngine
 {
     public class TreeGenerator
     {

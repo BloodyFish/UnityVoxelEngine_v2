@@ -1,6 +1,4 @@
-using BloodyFish.UnityVoxelEngine.v2;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -40,7 +38,7 @@ namespace BloodyFish.UnityVoxelEngine
         public float minPreciptation, maxPreciptation;
         public int treeDenisty;
 
-        public List<BloodyFish.UnityVoxelEngine.v2.Tree> trees;
+        public List<BloodyFish.UnityVoxelEngine.Tree> trees;
         //public BloodyFish.UnityVoxelEngine.v2.Tree tree;
 
 
@@ -49,7 +47,7 @@ namespace BloodyFish.UnityVoxelEngine
             NativeArray<TreeValues> treeValsArray = new NativeArray<TreeValues>(biome.trees.Count, Allocator.Persistent);
 
             int index = 0;
-            foreach(BloodyFish.UnityVoxelEngine.v2.Tree tree in biome.trees)
+            foreach(BloodyFish.UnityVoxelEngine.Tree tree in biome.trees)
             {
                 treeValsArray[index++] = new TreeValues
                 {

@@ -5,7 +5,7 @@ using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 
-namespace BloodyFish.UnityVoxelEngine.v2
+namespace BloodyFish.UnityVoxelEngine
 {
     public struct MeshValues
     {

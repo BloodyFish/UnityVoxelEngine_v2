@@ -9,7 +9,7 @@ using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 
-namespace BloodyFish.UnityVoxelEngine.v2
+namespace BloodyFish.UnityVoxelEngine
 {
     public enum GenerationPhase
     {
@@ -408,6 +408,7 @@ namespace BloodyFish.UnityVoxelEngine.v2
             }
         }
 
+        [BurstCompile]
         public static void DisposeOfChunk(int2 chunkPos)
         {
             if(GenerationManager.chunkDictionary.TryGetValue(chunkPos, out ChunkValues chunkValues))

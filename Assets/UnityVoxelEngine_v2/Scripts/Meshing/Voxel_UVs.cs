@@ -6,7 +6,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace BloodyFish.UnityVoxelEngine.v2
+namespace BloodyFish.UnityVoxelEngine
 {
     public class Voxel_UVs
     {

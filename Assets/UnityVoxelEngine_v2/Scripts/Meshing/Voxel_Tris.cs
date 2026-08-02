@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using Unity.Burst;
 using Unity.Collections;
 
-namespace BloodyFish.UnityVoxelEngine.v2
+namespace BloodyFish.UnityVoxelEngine
 {
     public class Voxel_Tris
     {

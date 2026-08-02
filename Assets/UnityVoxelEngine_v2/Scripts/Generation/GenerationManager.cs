@@ -10,7 +10,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using static UnityEditor.PlayerSettings;
 
-namespace BloodyFish.UnityVoxelEngine.v2
+namespace BloodyFish.UnityVoxelEngine
 {
     public struct WorldGenConstants
     {

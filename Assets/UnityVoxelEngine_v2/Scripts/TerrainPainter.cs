@@ -5,7 +5,8 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
-namespace BloodyFish.UnityVoxelEngine.v2
+
+namespace BloodyFish.UnityVoxelEngine
 {
     public class TerrainPainter
     {

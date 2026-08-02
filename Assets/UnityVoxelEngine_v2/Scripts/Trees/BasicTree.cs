@@ -1,9 +1,9 @@
 using UnityEngine;
 
-namespace BloodyFish.UnityVoxelEngine.v2
+namespace BloodyFish.UnityVoxelEngine
 {
     [CreateAssetMenu(menuName = "Trees/BasicTree")]
-    public class BasicTree : BloodyFish.UnityVoxelEngine.v2.Tree
+    public class BasicTree : BloodyFish.UnityVoxelEngine.Tree
     {
         public static void GenerateCanopy(Vector3Int pos, Chunk chunk, int[] blocks, Unity.Mathematics.Random random)
         {

@@ -5,7 +5,7 @@ using Unity.Burst;
 using Unity.Collections;
 using UnityEngine;
 
-namespace BloodyFish.UnityVoxelEngine.v2
+namespace BloodyFish.UnityVoxelEngine
 {
     public struct BlockData
     {

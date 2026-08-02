@@ -1,7 +1,7 @@
 using Unity.Mathematics;
 using Unity.Burst;
 
-namespace BloodyFish.UnityVoxelEngine.v2
+namespace BloodyFish.UnityVoxelEngine
 {
     [System.Serializable]
     public struct NoiseParameters
