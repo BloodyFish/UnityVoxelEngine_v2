@@ -159,7 +159,7 @@ MonoBehaviour:
     gain: 0.25
   noise3DParam:
     frequency: 0.5
-    octaves: 5
+    octaves: 2
     lacunarity: 3.5
     gain: 0.25
   caveNoiseParam:

@@ -73,20 +73,33 @@ namespace BloodyFish.UnityVoxelEngine
 
         public void Execute(int startIndex, int count )
         {
+            float height = 0;
+
             for(int index = startIndex; index < startIndex + count; index++)
             {
                 int x = index % ChunkValues.WIDTH;
-                int z = index / ChunkValues.WIDTH;
+                int z = index / ChunkValues.LENGTH;
 
-                float noiseVal_2D = NoiseGen.GetNoise(worldSpaceChunkPos, seedOffset, x, z, noise2D);
+                // Only calculate the 2D noise every other index
+                // This is a performance optimization
+                if(index % 2 == 0)
+                {
+                    float noiseVal_2D = NoiseGen.GetNoise(worldSpaceChunkPos, seedOffset, x, z, noise2D);
 
-                // Get the length of our continentalness to height spline
-                int height = GetTerrainHeight(continentalness.Length, continentalness, heightFromContinentalness, noiseVal_2D);
+                    // Get the length of our continentalness to height spline
+                    height = GetTerrainHeight(continentalness.Length, continentalness, heightFromContinentalness, noiseVal_2D);
+                }
 
+                float noiseVal_3D = 0;
                 for (int y = 0; y < height; y++)
                 {
-                    float noiseVal_3D = NoiseGen.GetNoise(worldSpaceChunkPos, seedOffset, x, y, z, noise3D);
-                    //float m_caveNoise = NoiseGen.GetNoise(noiseX, y + seedOffset.y, noiseZ, caveNoise);
+                    // We can calculate the 3D noise less often since it doesn't leave many artifacts
+                    // This is a performance optimization
+                    if(y % 5 == 0)
+                    {
+                        noiseVal_3D = NoiseGen.GetNoise(worldSpaceChunkPos, seedOffset, x, y, z, noise3D);
+                        //float m_caveNoise = NoiseGen.GetNoise(noiseX, y + seedOffset.y, noiseZ, caveNoise);
+                    }
 
                     if (noiseVal_3D > 0f)
                     {
@@ -127,7 +140,6 @@ namespace BloodyFish.UnityVoxelEngine
 
             return h;
         }
-
     }
 
     [BurstCompile]
