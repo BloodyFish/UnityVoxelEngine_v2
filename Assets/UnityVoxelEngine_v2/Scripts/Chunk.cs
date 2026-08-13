@@ -24,13 +24,16 @@ namespace BloodyFish.UnityVoxelEngine
     public struct ChunkValues
     {
         [ReadOnly]
-        public const int WIDTH = 16;
+        public const short WIDTH = 16;
 
         [ReadOnly]
-        public const int LENGTH = 16;
+        public const short LENGTH = 16;
 
         [ReadOnly]
-        public const int HEIGHT = 384;
+        public const short HEIGHT = 384;
+
+        [ReadOnly]
+        public const int CHUNK_SIZE = WIDTH * LENGTH * HEIGHT;
 
         [NativeDisableParallelForRestriction]
         public NativeArray<short> blocks;
@@ -112,7 +115,7 @@ namespace BloodyFish.UnityVoxelEngine
         public static ChunkValues CreateChunk(int2 pos)
         {
             ChunkValues chunkVals = new ChunkValues();
-            chunkVals.blocks = new NativeArray<short>(ChunkValues.WIDTH * ChunkValues.LENGTH * ChunkValues.HEIGHT, Allocator.Persistent);
+            chunkVals.blocks = new NativeArray<short>(ChunkValues.CHUNK_SIZE, Allocator.Persistent);
             chunkVals.pos = pos;
             chunkVals.worldSpacePos = new int2(pos.x * ChunkValues.WIDTH, pos.y * ChunkValues.LENGTH);
 
@@ -161,7 +164,7 @@ namespace BloodyFish.UnityVoxelEngine
                 int2 neighborPos = pos + offsets[i];
                 if (!GenerationManager.bufferDictionary.ContainsKey(neighborPos))
                 {
-                    NativeArray<short> buffer = new NativeArray<short>(ChunkValues.WIDTH * ChunkValues.LENGTH * ChunkValues.HEIGHT, Allocator.Persistent);
+                    NativeArray<short> buffer = new NativeArray<short>(ChunkValues.CHUNK_SIZE, Allocator.Persistent);
                     GenerationManager.bufferDictionary.TryAdd(neighborPos, new BlockBufferValues { blocks = buffer, pos = neighborPos });
                 }
             }
@@ -245,8 +248,7 @@ namespace BloodyFish.UnityVoxelEngine
         }
 
         // The only reason we use the ref keyword here is so that we can assign using "="
-        // Otheriwse, changing individual indexes in a NativeArray can be donw like a normal array, no need to pass by ref
-
+        // Otheriwse, changing individual indexes in a NativeArray can be done like a normal array, no need to pass by ref
         [BurstCompile]
         private static void GetBlocksRelativeChunk(int2 chunkPos, int3 blockPos, 
             ref NativeArray<short> blocks,

@@ -30,7 +30,7 @@ namespace BloodyFish.UnityVoxelEngine
 
             //Debug.Log(GenerationManager.chunkDictionary[chunkPos].biomeID);
 
-            int size = ChunkValues.WIDTH * ChunkValues.LENGTH * ChunkValues.HEIGHT;
+            int size = ChunkValues.CHUNK_SIZE;
             JobHandle treeJobHandle = treeGenJob.ScheduleParallel(size, GenerationManager.GetGoodBatchSize(size), dependency);
             return treeJobHandle;
         }
@@ -98,7 +98,8 @@ namespace BloodyFish.UnityVoxelEngine
                             short biomeID = Biome.GetBiome(worldSpaceChunkPos, seedOffset, x, y, z, temperatureNoiseParam, precipationNoiseParam, biomeParams);
 
 
-                            if (currentBlock.canGrowTree && random.NextInt(0, biomeParams[biomeID].treeDensity) == 1 && !Block.GetNeighboringBlocks(x, y + 1, z, blocks).Contains(biomeParams[biomeID].treeStemBlockID))
+                            //if (currentBlock.canGrowTree && random.NextInt(0, biomeParams[biomeID].treeDensity) == 1 && !Block.GetNeighboringBlocks(x, y + 1, z, blocks).Contains(biomeParams[biomeID].treeStemBlockID))
+                            if (currentBlock.canGrowTree && random.NextInt(0, biomeParams[biomeID].treeDensity) == 1)
                             {
                                 // While we are here, we might as well make it so that trees growing on grass blocks replace that block with dirt
                                 if (currentBlockID == biomeParams[biomeID].topBlockID) Chunk.SetBlock(biomeParams[biomeID].middleBlockID, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary);

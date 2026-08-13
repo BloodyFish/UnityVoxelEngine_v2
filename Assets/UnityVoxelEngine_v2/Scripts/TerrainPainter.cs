@@ -131,8 +131,6 @@ namespace BloodyFish.UnityVoxelEngine
         public NoiseParameters temperatureNoiseParam, precipationNoiseParam;
 
 
-
-
         public void Execute(int startIndex, int count)
         {
             short biomeID = 0;
