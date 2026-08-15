@@ -248,27 +248,19 @@ namespace BloodyFish.UnityVoxelEngine
         [BurstCompile]
         private int2 UpdateCurrentChunk()
         {
-            int xPos;
-            int zPos;
+            int xPos = (int)(player.position.x / ChunkValues.WIDTH);
+            int zPos = (int)(player.position.z / ChunkValues.LENGTH);
 
             if (player.position.x < 0)
             {
-                xPos = (int)(player.position.x / ChunkValues.WIDTH) - 1;
-            }
-            else
-            {
-                xPos = (int)(player.position.x / ChunkValues.WIDTH);
+                xPos -= 1;
             }
 
             if (player.position.z < 0)
             {
-                zPos = (int)(player.position.z / ChunkValues.LENGTH) - 1;
+                zPos -= 1;
             }
-            else
-            {
-                zPos = (int)(player.position.z / ChunkValues.LENGTH);
-            }
-            
+
             return new int2(xPos, zPos);
         }
 
