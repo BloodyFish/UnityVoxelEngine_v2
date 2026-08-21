@@ -36,7 +36,9 @@ namespace BloodyFish.UnityVoxelEngine
         public const int CHUNK_SIZE = WIDTH * LENGTH * HEIGHT;
 
         [NativeDisableParallelForRestriction]
-        public NativeArray<short> blocks;
+
+        // TO-DO instead of storing "blocks" we store an index to a block palette. This will save memory and allow for more blocks to be added in the future
+        public NativeArray<sbyte> blocks;
 
         public int2 pos;
         public int2 worldSpacePos;
@@ -47,7 +49,7 @@ namespace BloodyFish.UnityVoxelEngine
         public MeshValues terrainMeshValues;
         public MeshValues waterMeshValues;
 
-        public short biomeID;
+        public byte biomeID;
 
         public JobHandle treeGenJobHandle;
         public TreeGenJob treeGenJob;
@@ -58,7 +60,7 @@ namespace BloodyFish.UnityVoxelEngine
 
     public struct BlockBufferValues
     {
-            public NativeArray<short> blocks;
+            public NativeArray<sbyte> blocks;
             public int2 pos;
     }
 
@@ -115,7 +117,7 @@ namespace BloodyFish.UnityVoxelEngine
         public static ChunkValues CreateChunk(int2 pos)
         {
             ChunkValues chunkVals = new ChunkValues();
-            chunkVals.blocks = new NativeArray<short>(ChunkValues.CHUNK_SIZE, Allocator.Persistent);
+            chunkVals.blocks = new NativeArray<sbyte>(ChunkValues.CHUNK_SIZE, Allocator.Persistent);
             chunkVals.pos = pos;
             chunkVals.worldSpacePos = new int2(pos.x * ChunkValues.WIDTH, pos.y * ChunkValues.LENGTH);
 
@@ -164,7 +166,7 @@ namespace BloodyFish.UnityVoxelEngine
                 int2 neighborPos = pos + offsets[i];
                 if (!GenerationManager.bufferDictionary.ContainsKey(neighborPos))
                 {
-                    NativeArray<short> buffer = new NativeArray<short>(ChunkValues.CHUNK_SIZE, Allocator.Persistent);
+                    NativeArray<sbyte> buffer = new NativeArray<sbyte>(ChunkValues.CHUNK_SIZE, Allocator.Persistent);
                     GenerationManager.bufferDictionary.TryAdd(neighborPos, new BlockBufferValues { blocks = buffer, pos = neighborPos });
                 }
             }
@@ -202,13 +204,13 @@ namespace BloodyFish.UnityVoxelEngine
 
         [BurstCompile]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void MergeBlockBuffer(int2 chunkPos, NativeArray<short> blocks)
+        public static void MergeBlockBuffer(int2 chunkPos, NativeArray<sbyte> blocks)
         {
             if(GenerationManager.bufferDictionary.TryGetValue(chunkPos, out BlockBufferValues blockBuffer))
             {
                 for (int i = 0; i < blocks.Length; i++)
                 {
-                    short bufferBlockID = blockBuffer.blocks[i];
+                    sbyte bufferBlockID = blockBuffer.blocks[i];
                     
                     if (blocks[i] == 0 && bufferBlockID != 0)
                     {
@@ -223,8 +225,8 @@ namespace BloodyFish.UnityVoxelEngine
 
         [BurstCompile]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetBlock(short blockID, int2 chunkPos, int3 blockPos, 
-            NativeArray<short> blocks,
+        public static void SetBlock(sbyte blockID, int2 chunkPos, int3 blockPos, 
+            NativeArray<sbyte> blocks,
             NativeParallelHashMap<int2, BlockBufferValues> bufferDictionary,
             NativeParallelHashMap<int2, ChunkValues> chunkDictionary)
         {
@@ -236,8 +238,8 @@ namespace BloodyFish.UnityVoxelEngine
 
         [BurstCompile]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static short GetBlock(int2 chunkPos, int3 blockPos,
-            NativeArray<short> blocks,
+        public static sbyte GetBlock(int2 chunkPos, int3 blockPos,
+            NativeArray<sbyte> blocks,
             NativeParallelHashMap<int2, BlockBufferValues> bufferDictionary,
             NativeParallelHashMap<int2, ChunkValues> chunkDictionary)
         {
@@ -251,7 +253,7 @@ namespace BloodyFish.UnityVoxelEngine
         // Otheriwse, changing individual indexes in a NativeArray can be done like a normal array, no need to pass by ref
         [BurstCompile]
         private static void GetBlocksRelativeChunk(int2 chunkPos, int3 blockPos, 
-            ref NativeArray<short> blocks,
+            ref NativeArray<sbyte> blocks,
             NativeParallelHashMap<int2, BlockBufferValues> bufferDictionary,
             NativeParallelHashMap<int2, ChunkValues> chunkDictionary)
         {
@@ -323,7 +325,7 @@ namespace BloodyFish.UnityVoxelEngine
                 chunk.treeGenJobHandle.IsCompleted)
             {
                 chunk.treeGenJobHandle.Complete();
-                chunk.blocks = new NativeArray<short>(chunk.treeGenJob.blocks, Allocator.Persistent);
+                chunk.blocks = new NativeArray<sbyte>(chunk.treeGenJob.blocks, Allocator.Persistent);
                 chunk.treeGenJob.blocks.Dispose();
 
                 chunk.generationPhase = GenerationPhase.DONE_GEN_TERRAIN;

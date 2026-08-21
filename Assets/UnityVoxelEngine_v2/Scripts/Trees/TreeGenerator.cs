@@ -11,7 +11,7 @@ namespace BloodyFish.UnityVoxelEngine
     {
 
         [BurstCompile]
-        public static JobHandle PlantTrees(int2 worldSpaceChunkPos, int2 chunkPos, NativeArray<short> blocks, ref Unity.Mathematics.Random random, JobHandle dependency, out TreeGenJob treeGenJob)
+        public static JobHandle PlantTrees(int2 worldSpaceChunkPos, int2 chunkPos, NativeArray<sbyte> blocks, ref Unity.Mathematics.Random random, JobHandle dependency, out TreeGenJob treeGenJob)
         {
             treeGenJob = new TreeGenJob()
             {
@@ -42,7 +42,7 @@ namespace BloodyFish.UnityVoxelEngine
     {
         // The [NativeDisableContainerSafetyRestriction] allows us to bypass the "Nested Native Containers are illegal in jobs" error
         [NativeDisableParallelForRestriction]
-        public NativeArray<short> blocks;
+        public NativeArray<sbyte> blocks;
 
         [ReadOnly]
         public NativeArray<BlockData> possibleBlocks;
@@ -95,7 +95,7 @@ namespace BloodyFish.UnityVoxelEngine
                             BlockData currentBlock = possibleBlocks[currentBlockID - 1];
 
                             // CalculateBiome
-                            short biomeID = Biome.GetBiome(worldSpaceChunkPos, seedOffset, x, y, z, temperatureNoiseParam, precipationNoiseParam, biomeParams);
+                            byte biomeID = Biome.GetBiome(worldSpaceChunkPos, seedOffset, x, y, z, temperatureNoiseParam, precipationNoiseParam, biomeParams);
 
 
                             //if (currentBlock.canGrowTree && random.NextInt(0, biomeParams[biomeID].treeDensity) == 1 && !Block.GetNeighboringBlocks(x, y + 1, z, blocks).Contains(biomeParams[biomeID].treeStemBlockID))

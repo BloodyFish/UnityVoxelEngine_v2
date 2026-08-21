@@ -7,8 +7,8 @@ namespace BloodyFish.UnityVoxelEngine
 {
     public struct TreeValues
     {
-        public short trunkBlockID;
-        public short leafBlockID;
+        public sbyte trunkBlockID;
+        public sbyte leafBlockID;
 
         public int minHeight;
         public int maxHeight;
@@ -36,7 +36,7 @@ namespace BloodyFish.UnityVoxelEngine
 
         [BurstCompile]
         public static void GenerateTrunk(TreeValues treeVals, int2 chunkPos, int3 blockPos, 
-            NativeArray<short> blocks,
+            NativeArray<sbyte> blocks,
             NativeParallelHashMap<int2, BlockBufferValues> bufferDictionary,
             NativeParallelHashMap<int2, ChunkValues> chunkDictionary, 
             ref Unity.Mathematics.Random random, out int height)
@@ -54,7 +54,7 @@ namespace BloodyFish.UnityVoxelEngine
 
         [BurstCompile]
         public static void GenerateCanopy(TreeValues treeVals, int2 chunkPos, int3 blockPos,
-            NativeArray<short> blocks,
+            NativeArray<sbyte> blocks,
             NativeParallelHashMap<int2, BlockBufferValues> bufferDictionary,
             NativeParallelHashMap<int2, ChunkValues> chunkDictionary,
             ref Unity.Mathematics.Random random) 

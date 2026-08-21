@@ -29,7 +29,7 @@ namespace BloodyFish.UnityVoxelEngine
     {
         public string blockName;
 
-        [HideInInspector] public short blockID;
+        [HideInInspector] public sbyte blockID;
         public Color32 tint;
 
         public Vector2Int texCoord_front;
@@ -56,19 +56,19 @@ namespace BloodyFish.UnityVoxelEngine
 
         [BurstCompile]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NativeArray<short> GetNeighboringBlocks(int x, int y, int z, NativeArray<short> blocks)
+        public static NativeArray<sbyte> GetNeighboringBlocks(int x, int y, int z, NativeArray<sbyte> blocks)
         {
-            short right = blocks[Block.GetFlatIndex(x + 1, y, z)];
-            short left = blocks[Block.GetFlatIndex(x - 1, y, z)];
-            short front = blocks[Block.GetFlatIndex(x, y, z + 1)];
-            short back = blocks[Block.GetFlatIndex(x, y, z - 1)];
+            sbyte right = blocks[Block.GetFlatIndex(x + 1, y, z)];
+            sbyte left = blocks[Block.GetFlatIndex(x - 1, y, z)];
+            sbyte front = blocks[Block.GetFlatIndex(x, y, z + 1)];
+            sbyte back = blocks[Block.GetFlatIndex(x, y, z - 1)];
 
-            /*short front_right = blocks[Block.GetFlatIndex(x + 1, y, z + 1)];
-            short front_left = blocks[Block.GetFlatIndex(x - 1, y, z + 1)];
-            short back_right = blocks[Block.GetFlatIndex(x + 1, y, z - 1)];
-            short back_left = blocks[Block.GetFlatIndex(x - 1, y, z - 1)];*/
+            /*sbyte front_right = blocks[Block.GetFlatIndex(x + 1, y, z + 1)];
+            sbyte front_left = blocks[Block.GetFlatIndex(x - 1, y, z + 1)];
+            sbyte back_right = blocks[Block.GetFlatIndex(x + 1, y, z - 1)];
+            sbyte back_left = blocks[Block.GetFlatIndex(x - 1, y, z - 1)];*/
 
-            NativeArray<short> neighbors = new NativeArray<short>(4, Allocator.Temp);
+            NativeArray<sbyte> neighbors = new NativeArray<sbyte>(4, Allocator.Temp);
 
             neighbors[0] = right;
             neighbors[1] = left;

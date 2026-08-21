@@ -11,13 +11,13 @@ namespace BloodyFish.UnityVoxelEngine
     // Structs are burst compatable
     public struct BiomeParameters
     {
-        public short topBlockID;
-        public short middleBlockID;
-        public short stoneBlockID;
-        public short snowBlockID;
-        public short beachBlockID;
-        public short treeStemBlockID;
-        public short treeLeafBlockID;
+        public sbyte topBlockID;
+        public sbyte middleBlockID;
+        public sbyte stoneBlockID;
+        public sbyte snowBlockID;
+        public sbyte beachBlockID;
+        public sbyte treeStemBlockID;
+        public sbyte treeLeafBlockID;
 
         public float minTemp, maxTemp;
         public float minPreciptation, maxPreciptation;
@@ -81,14 +81,14 @@ namespace BloodyFish.UnityVoxelEngine
         }
 
         [BurstCompile]
-        public static short GetBiome(int2 worldSpacePos, float3 seedOffset, int x, int y, int z, NoiseParameters temperatureParam, NoiseParameters precipitationParam, NativeArray<BiomeParameters> biomeParams)
+        public static byte GetBiome(int2 worldSpacePos, float3 seedOffset, int x, int y, int z, NoiseParameters temperatureParam, NoiseParameters precipitationParam, NativeArray<BiomeParameters> biomeParams)
         {
-            short biomeID = 0;
+            byte biomeID = 0;
 
             float temperatureNoise = Unity.Mathematics.math.remap(-1, 1, -15, 35, NoiseGen.GetNoise(worldSpacePos, seedOffset, x, y, z, temperatureParam));
             float precipitationNoise = Unity.Mathematics.math.remap(-1, 1, 0, 175, NoiseGen.GetNoise(worldSpacePos, seedOffset, x, y, z, precipitationParam));
 
-            short i = 0;
+            byte i = 0;
             foreach (BiomeParameters biomeParam in biomeParams)
             {
                 if ((temperatureNoise >= biomeParam.minTemp && temperatureNoise <= biomeParam.maxTemp)

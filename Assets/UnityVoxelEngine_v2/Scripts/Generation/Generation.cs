@@ -26,7 +26,7 @@ namespace BloodyFish.UnityVoxelEngine
         }
 
         [BurstCompile]
-        public static JobHandle GenTerrain(int2 worldSpaceChunkPos, NativeArray<short> blocks, ref Unity.Mathematics.Random random, out GenerateChunkValuesJob generationJob)
+        public static JobHandle GenTerrain(int2 worldSpaceChunkPos, NativeArray<sbyte> blocks, ref Unity.Mathematics.Random random, out GenerateChunkValuesJob generationJob)
         {
             generationJob = new GenerateChunkValuesJob()
             {
@@ -53,7 +53,7 @@ namespace BloodyFish.UnityVoxelEngine
     public struct GenerateChunkValuesJob : IJobParallelForBatch
     {
         [NativeDisableParallelForRestriction]
-        public NativeArray<short> blocks;
+        public NativeArray<sbyte> blocks;
 
         [ReadOnly]
         public NativeArray<float> continentalness;

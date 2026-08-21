@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Unity.Burst;
 using Unity.Collections;
-using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using static UnityEditor.PlayerSettings;
@@ -49,7 +49,7 @@ namespace BloodyFish.UnityVoxelEngine
         public static NativeParallelHashMap<int2, BlockBufferValues> bufferDictionary = new NativeParallelHashMap<int2, BlockBufferValues>(0, Allocator.Persistent);
         Queue<int2> chunkQueue = new Queue<int2>();
 
-        Coroutine generateChunkCoroutine;
+        //Coroutine generateChunkCoroutine;
 
         int2[] offsets =
         {
@@ -97,7 +97,7 @@ namespace BloodyFish.UnityVoxelEngine
 
             for (int i = 0; i < possibleBlocks_list.Count; i++)
             {
-                short ID = (short)(i + 1);
+                sbyte ID = (sbyte)(i + 1);
                 possibleBlocks_list[i].blockID = ID;
 
                 BlockData blockData = new BlockData
@@ -157,8 +157,9 @@ namespace BloodyFish.UnityVoxelEngine
 
             blockRenderDistance = renderDistance * ChunkValues.WIDTH;
 
-            generateChunkCoroutine = StartCoroutine(GenerateChunk());
+            StartCoroutine(GenerateChunk());
             StartCoroutine(MeshChunks());
+            StartCoroutine(RemoveUneededChunks());
         }
 
         private void Update()
@@ -173,8 +174,9 @@ namespace BloodyFish.UnityVoxelEngine
                 Chunk.SetChunkCollsions(currentChunkPos, false);
 
                 currentChunkPos = UpdateCurrentChunk();
-                StopCoroutine(generateChunkCoroutine);
-                generateChunkCoroutine = StartCoroutine(GenerateChunk());
+                
+                //StopCoroutine(generateChunkCoroutine);
+                StartCoroutine(GenerateChunk());
 
                 // Enable our new current chunk's (and its neighbors') colliders
                 Chunk.SetChunkCollsions(currentChunkPos, true);
@@ -214,13 +216,25 @@ namespace BloodyFish.UnityVoxelEngine
                 }       
             }
 
-            for(int i = 0; i < Chunk.busyChunks.Count; i++)
+            //StartCoroutine(RemoveUneededChunks());
+
+        }
+
+        private IEnumerator RemoveUneededChunks()
+        {
+            //for(int i = 0; i < Chunk.busyChunks.Count; i++)
+            while(true)
             {
-                int2 chunkPos = Chunk.busyChunks.Peek();
-                if(!Chunk.CalculateIfInRenderDistance(chunkPos, new float2(player.position.x, player.position.z), blockRenderDistance))
+                if(Chunk.busyChunks.Count > 0)
                 {
-                    Chunk.busyChunks.Dequeue();
+                    int2 chunkPos = Chunk.busyChunks.Peek();
+                    if(!Chunk.CalculateIfInRenderDistance(chunkPos, new float2(player.position.x, player.position.z), blockRenderDistance))
+                    {
+                        Chunk.busyChunks.Dequeue();
+                    }
                 }
+                
+                yield return null;
             }
         }
 

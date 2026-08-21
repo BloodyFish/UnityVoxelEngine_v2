@@ -11,7 +11,7 @@ namespace BloodyFish.UnityVoxelEngine
     public class TerrainPainter
     {
         [BurstCompile]
-        public static JobHandle Paint(int2 worldSpaceChunkPos, int2 chunkPos, NativeArray<short> blocks, ref Unity.Mathematics.Random random, JobHandle dependency, out TerrainPaintJob paintJob)
+        public static JobHandle Paint(int2 worldSpaceChunkPos, int2 chunkPos, NativeArray<sbyte> blocks, ref Unity.Mathematics.Random random, JobHandle dependency, out TerrainPaintJob paintJob)
         {
             paintJob = new TerrainPaintJob()
             {
@@ -40,7 +40,7 @@ namespace BloodyFish.UnityVoxelEngine
         // We need to pass random by reference or else it will reset each time, making it look like no randomness is applied
         [BurstCompile]
         public static void PaintTerrain(ref Unity.Mathematics.Random random, int i, int2 chunkPos, int3 blockPos, 
-            NativeArray<short> blocks,
+            NativeArray<sbyte> blocks,
             BiomeParameters biomeParam,
             NativeParallelHashMap<int2, BlockBufferValues> bufferDictionary,
             NativeParallelHashMap<int2, ChunkValues> chunkDictionary)
@@ -86,7 +86,7 @@ namespace BloodyFish.UnityVoxelEngine
         [BurstCompile]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void FillWater(int i, int2 chunkPos, int3 blockPos,
-            NativeArray<short> blocks,
+            NativeArray<sbyte> blocks,
             NativeParallelHashMap<int2, BlockBufferValues> bufferDictionary,
             NativeParallelHashMap<int2, ChunkValues> chunkDictionary)
         {
@@ -102,7 +102,7 @@ namespace BloodyFish.UnityVoxelEngine
     public struct TerrainPaintJob : IJobParallelForBatch
     {
         [NativeDisableParallelForRestriction]
-        public NativeArray<short> blocks;
+        public NativeArray<sbyte> blocks;
 
         [NativeDisableContainerSafetyRestriction]
         public NativeParallelHashMap<int2, BlockBufferValues> bufferDictionary;
@@ -133,7 +133,7 @@ namespace BloodyFish.UnityVoxelEngine
 
         public void Execute(int startIndex, int count)
         {
-            short biomeID = 0;
+            byte biomeID = 0;
             for (int i = startIndex; i < startIndex + count; i++)
             {
                 int x = i % ChunkValues.WIDTH;
@@ -150,7 +150,7 @@ namespace BloodyFish.UnityVoxelEngine
                 }
 
                 // The ID of the current, unpainted block
-                short id = blocks[i];
+                sbyte id = blocks[i];
 
                 int3 blockPos = new int3(x, y, z);
 
