@@ -154,14 +154,15 @@ MonoBehaviour:
     y: 0
   noise2DParam:
     frequency: 0.5
-    octaves: 5
-    lacunarity: 3.5
-    gain: 0.25
+    octaves: 4
+    lacunarity: 4
+    gain: 0.15
   noise3DParam:
     frequency: 0.5
-    octaves: 2
+    octaves: 4
     lacunarity: 3.5
     gain: 0.25
+  cellularNoiseFrequency: 5
   caveNoiseParam:
     frequency: 25
     octaves: 2

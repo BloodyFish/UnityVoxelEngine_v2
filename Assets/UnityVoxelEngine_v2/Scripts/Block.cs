@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using Unity.Burst;
 using Unity.Collections;
 using UnityEngine;
+using Unity.Mathematics;
 
 namespace BloodyFish.UnityVoxelEngine
 {
@@ -56,28 +57,35 @@ namespace BloodyFish.UnityVoxelEngine
 
         [BurstCompile]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NativeArray<sbyte> GetNeighboringBlocks(int x, int y, int z, NativeArray<sbyte> blocks)
+        public static NativeArray<sbyte> GetNeighboringBlocks(int2 chunkPos, int3 blockPos,
+            NativeArray<sbyte> blocks,
+            NativeParallelHashMap<int2, BlockBufferValues> bufferDictionary,
+            NativeParallelHashMap<int2, ChunkValues> chunkDictionary)
         {
-            sbyte right = blocks[Block.GetFlatIndex(x + 1, y, z)];
-            sbyte left = blocks[Block.GetFlatIndex(x - 1, y, z)];
-            sbyte front = blocks[Block.GetFlatIndex(x, y, z + 1)];
-            sbyte back = blocks[Block.GetFlatIndex(x, y, z - 1)];
+            sbyte right = Chunk.GetBlock(chunkPos, new int3(blockPos.x + 1, blockPos.y, blockPos.z), blocks, bufferDictionary, chunkDictionary);
+            sbyte left = Chunk.GetBlock(chunkPos, new int3(blockPos.x - 1, blockPos.y, blockPos.z), blocks, bufferDictionary, chunkDictionary);
+            sbyte front = Chunk.GetBlock(chunkPos, new int3(blockPos.x, blockPos.y, blockPos.z + 1), blocks, bufferDictionary, chunkDictionary);
+            sbyte back = Chunk.GetBlock(chunkPos, new int3(blockPos.x, blockPos.y, blockPos.z - 1), blocks, bufferDictionary, chunkDictionary);
+            sbyte top = Chunk.GetBlock(chunkPos, new int3(blockPos.x, blockPos.y + 1, blockPos.z), blocks, bufferDictionary, chunkDictionary);
+            sbyte bottom = Chunk.GetBlock(chunkPos, new int3(blockPos.x, blockPos.y - 1, blockPos.z), blocks, bufferDictionary, chunkDictionary);
 
             /*sbyte front_right = blocks[Block.GetFlatIndex(x + 1, y, z + 1)];
             sbyte front_left = blocks[Block.GetFlatIndex(x - 1, y, z + 1)];
             sbyte back_right = blocks[Block.GetFlatIndex(x + 1, y, z - 1)];
             sbyte back_left = blocks[Block.GetFlatIndex(x - 1, y, z - 1)];*/
 
-            NativeArray<sbyte> neighbors = new NativeArray<sbyte>(4, Allocator.Temp);
+            NativeArray<sbyte> neighbors = new NativeArray<sbyte>(6, Allocator.Temp);
 
             neighbors[0] = right;
             neighbors[1] = left;
             neighbors[2] = front;
             neighbors[3] = back;
-            /*neighbors[4] = front_right;
-            neighbors[5] = front_left;
-            neighbors[6] = back_right;
-            neighbors[7] = back_left;*/
+            neighbors[4] = top;
+            neighbors[5] = bottom;
+            /*neighbors[6] = front_right;
+            neighbors[7] = front_left;
+            neighbors[8] = back_right;
+            neighbors[9] = back_left;*/
 
             return neighbors;
         }

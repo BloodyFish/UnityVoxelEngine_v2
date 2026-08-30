@@ -64,13 +64,20 @@ namespace BloodyFish.UnityVoxelEngine
 
                     else if (blockPos.y > (WorldGenConstants.WATER_LEVEL + WorldGenConstants.BEACH_HEIGHT) - random.NextInt(1, 3))
                     {
-                        if (Chunk.GetBlock(chunkPos, new int3(blockPos.x, blockPos.y + 1, blockPos.z), blocks, bufferDictionary, chunkDictionary) == 0) 
+                        if(Block.GetNeighboringBlocks(chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary).Contains((sbyte)-1))
                         {
-                            Chunk.SetBlock(biomeParam.topBlockID, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary); 
+                            Chunk.SetBlock(biomeParam.beachBlockID, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary); 
                         }
-                        else 
-                        { 
-                            Chunk.SetBlock(biomeParam.middleBlockID, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary); 
+                        else
+                        {
+                            if (Chunk.GetBlock(chunkPos, new int3(blockPos.x, blockPos.y + 1, blockPos.z), blocks, bufferDictionary, chunkDictionary) == 0)
+                            {
+                                Chunk.SetBlock(biomeParam.topBlockID, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary); 
+                            }
+                            else
+                            {
+                                Chunk.SetBlock(biomeParam.middleBlockID, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary); 
+                            }
                         }
                     }
 
@@ -95,6 +102,7 @@ namespace BloodyFish.UnityVoxelEngine
                Chunk.SetBlock(-1, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary);
             }
         }
+
     }
 
 

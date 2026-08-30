@@ -29,6 +29,7 @@ namespace BloodyFish.UnityVoxelEngine
         public NoiseParameters noise2DParam;
 
         public  NoiseParameters noise3DParam;
+        public float cellularNoiseFrequency;
         public NoiseParameters caveNoiseParam;  // unused... for now
         public NoiseParameters temperatureNoiseParam;
         public NoiseParameters perciptationNoiseParam;

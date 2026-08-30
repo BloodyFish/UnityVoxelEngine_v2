@@ -21,6 +21,7 @@ namespace BloodyFish.UnityVoxelEngine
 
         public float minTemp, maxTemp;
         public float minPreciptation, maxPreciptation;
+        public float minHeight, maxHeight;
         public int treeDensity;
         public NativeArray<TreeValues> treeValsArray;
     }
@@ -36,6 +37,7 @@ namespace BloodyFish.UnityVoxelEngine
 
         public float minTemp, maxTemp;
         public float minPreciptation, maxPreciptation;
+        public float minHeight, maxHeight;
         public int treeDenisty;
 
         public List<BloodyFish.UnityVoxelEngine.Tree> trees;
@@ -74,6 +76,10 @@ namespace BloodyFish.UnityVoxelEngine
 
                 minPreciptation = biome.minPreciptation,
                 maxPreciptation = biome.maxPreciptation,
+
+                minHeight = biome.minHeight,
+                maxHeight = biome.maxHeight,
+
                 treeDensity = biome.treeDenisty,
 
                 treeValsArray = treeValsArray,
@@ -92,7 +98,8 @@ namespace BloodyFish.UnityVoxelEngine
             foreach (BiomeParameters biomeParam in biomeParams)
             {
                 if ((temperatureNoise >= biomeParam.minTemp && temperatureNoise <= biomeParam.maxTemp)
-                && (precipitationNoise >= biomeParam.minPreciptation && precipitationNoise <= biomeParam.maxPreciptation))
+                && (precipitationNoise >= biomeParam.minPreciptation && precipitationNoise <= biomeParam.maxPreciptation)
+                && (y >= biomeParam.minHeight && y <= biomeParam.maxHeight))
                 {
                     biomeID = i;
                     break;

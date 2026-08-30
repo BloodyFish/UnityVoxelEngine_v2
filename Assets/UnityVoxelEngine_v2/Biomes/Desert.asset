@@ -21,6 +21,8 @@ MonoBehaviour:
   maxTemp: 30
   minPreciptation: 0
   maxPreciptation: 50
+  minHeight: 0
+  maxHeight: 100
   treeDenisty: 0
   trees:
   - {fileID: 11400000, guid: e4eb56050c4720148a1d428d91054ac1, type: 2}

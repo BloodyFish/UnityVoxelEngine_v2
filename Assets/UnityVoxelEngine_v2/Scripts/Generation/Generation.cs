@@ -39,6 +39,7 @@ namespace BloodyFish.UnityVoxelEngine
                 seedOffset = GenerationManager.seedOffset,
                 noise2D = GenerationManager.instance.noise2DParam,
                 noise3D = GenerationManager.instance.noise3DParam,
+                cellularNoiseFrequency = GenerationManager.instance.cellularNoiseFrequency,
                 caveNoise = GenerationManager.instance.caveNoiseParam
             };
 
@@ -70,10 +71,14 @@ namespace BloodyFish.UnityVoxelEngine
         [ReadOnly]
         public NoiseParameters noise2D, noise3D, caveNoise;
 
+        [ReadOnly]
+        public float cellularNoiseFrequency;
+
 
         public void Execute(int startIndex, int count )
         {
             float height = 0;
+            float future_height = 0;
 
             for(int index = startIndex; index < startIndex + count; index++)
             {
@@ -85,26 +90,53 @@ namespace BloodyFish.UnityVoxelEngine
                 if(index % 2 == 0)
                 {
                     float noiseVal_2D = NoiseGen.GetNoise(worldSpaceChunkPos, seedOffset, x, z, noise2D);
+                    float future_noiseVal_2D = NoiseGen.GetNoise(worldSpaceChunkPos, seedOffset, x + 2, z, noise2D);
 
                     // Get the length of our continentalness to height spline
                     height = GetTerrainHeight(continentalness.Length, continentalness, heightFromContinentalness, noiseVal_2D);
+                    future_height = GetTerrainHeight(continentalness.Length, continentalness, heightFromContinentalness, future_noiseVal_2D);
+                }
+                else
+                {
+                    height = math.lerp(height, future_height, 0.5f);
                 }
 
+                float2 cellularNoise = NoiseGen.GetCellularNoise(worldSpaceChunkPos, seedOffset, x, z, cellularNoiseFrequency);
+                float riverNoise = cellularNoise.y - cellularNoise.x;
+
                 float noiseVal_3D = 0;
+                float future_noiseVal_3D = 0;
                 for (int y = 0; y < height; y++)
                 {
-                    // We can calculate the 3D noise less often since it doesn't leave many artifacts
+
                     // This is a performance optimization
-                    if(y % 5 == 0)
+                    if(y % 2 == 0)
                     {
                         noiseVal_3D = NoiseGen.GetNoise(worldSpaceChunkPos, seedOffset, x, y, z, noise3D);
+                        future_noiseVal_3D = NoiseGen.GetNoise(worldSpaceChunkPos, seedOffset, x, y + 2, z, noise3D);
+
                         //float m_caveNoise = NoiseGen.GetNoise(noiseX, y + seedOffset.y, noiseZ, caveNoise);
+                    }
+                    else
+                    {
+                        noiseVal_3D = math.lerp(noiseVal_3D, future_noiseVal_3D, 0.5f);
                     }
 
                     if (noiseVal_3D > 0f)
                     {
                         int i = Block.GetFlatIndex(x, y, z);
                         blocks[i] = 1;
+
+                        float riverNoiseThreshold = 0.02f;
+                        if(riverNoise < riverNoiseThreshold && y > WorldGenConstants.WATER_LEVEL - 1)
+                        {
+                            // This adds a slope to the river bed
+                            if(y > height - ((riverNoiseThreshold * 100) - (riverNoise * 100)) - 1)
+                            {
+                                blocks[i] = -1;
+                            }
+                        }
+
                     }
                 }
             }     
@@ -146,15 +178,18 @@ namespace BloodyFish.UnityVoxelEngine
     public struct StartMeshGenJob : IJobParallelFor
     {
         [ReadOnly]
+        [NativeDisableParallelForRestriction]
         [NativeDisableContainerSafetyRestriction]
         public NativeList<ChunkValues> chunkValsArray;
 
         [ReadOnly]
+        [NativeDisableParallelForRestriction]
         [NativeDisableContainerSafetyRestriction]
         public NativeParallelHashMap<int2, ChunkValues> chunkDictionary;
 
         [ReadOnly]
         [NativeDisableParallelForRestriction]
+        [NativeDisableContainerSafetyRestriction]
         public NativeArray<BlockData> possibleBlocks;
 
 

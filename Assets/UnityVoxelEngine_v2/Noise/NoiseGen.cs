@@ -78,5 +78,50 @@ namespace BloodyFish.UnityVoxelEngine
             return noiseVal; 
 
         }
+
+        [BurstCompile]
+        public static float2 GetCellularNoise(int2 worldSpacePos, float3 seedOffset, int x, int z, float frequency)
+        {
+            float xOffset = worldSpacePos.x + seedOffset.x;
+            float zOffset = worldSpacePos.y + seedOffset.z;
+
+            float noiseX = x + xOffset;
+            float noiseZ = z + zOffset;
+
+            float2 pos = new float2(noiseX, noiseZ);
+
+
+            // Gemini helped me come up with the following "wiggle" function to make the cellular noise less uniform and more natural looking.
+            float2 wiggle = Unity.Mathematics.noise.snoise(pos * 0.0075f) * 25.0f; 
+            pos += wiggle;
+
+            float2 noiseVal = Unity.Mathematics.noise.cellular(pos * (frequency / 1000));
+
+            return noiseVal;
+        }
+
+
+        [BurstCompile]
+        public static float2 GetCellularNoise(int2 worldSpacePos, float3 seedOffset, int x, int y, int z, float frequency)
+        {
+            float xOffset = worldSpacePos.x + seedOffset.x;
+            float yOffset = worldSpacePos.y + seedOffset.y;
+            float zOffset = worldSpacePos.y + seedOffset.z;
+
+            float noiseX = x + xOffset;
+            float noiseY = y + yOffset;
+            float noiseZ = z + zOffset;
+
+            float3 pos = new float3(noiseX, noiseY, noiseZ);
+
+
+            // Gemini helped me come up with the following "wiggle" function to make the cellular noise less uniform and more natural looking.
+            float3 wiggle = Unity.Mathematics.noise.snoise(pos * 0.0075f) * 25.0f; 
+            pos += wiggle;
+
+            float2 noiseVal = Unity.Mathematics.noise.cellular(pos * (frequency / 1000));
+
+            return noiseVal;
+        }
     }
 }
