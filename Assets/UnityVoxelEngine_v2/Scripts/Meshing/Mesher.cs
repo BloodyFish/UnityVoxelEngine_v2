@@ -17,13 +17,6 @@ namespace BloodyFish.UnityVoxelEngine
 
     public class Mesher
     {
-        private readonly Chunk chunk;
-
-        public Mesher(Chunk chunk)
-        {
-            this.chunk = chunk;
-        }
-
         public static void Meshify(GameObject obj, MeshValues values)
         {
             Mesh mesh = new Mesh();
@@ -148,7 +141,7 @@ namespace BloodyFish.UnityVoxelEngine
             for(int index = 0; index < chunkValues.blocks.Length; index++)
             {
                 int i = chunkValues.blocks[index];
-                if (i > 0)
+                if (i > 0 && i <= possbleBlocks.Length)
                 {
                     // The blocks in possibleBlocks should be sorted by their blockID.
                     // So a block with blockID 1 should be at index 0, a block with blockID 2 should be at index 1, and so on.
@@ -356,7 +349,14 @@ namespace BloodyFish.UnityVoxelEngine
                                 if (adjacentChunk.blocks[j] == 0)
                                 {
                                     int offset = values.verts.Length;
-                                    Voxel_Verts_Water.RightFace(ref values.verts, x, y, z);
+                                    if(adjacentChunk.blocks[Block.GetFlatIndex(0, y + 1, z)] == -1)
+                                    {
+                                        Voxel_Verts.RightFace(ref values.verts, x, y, z);
+                                    }
+                                    else
+                                    {
+                                        Voxel_Verts_Water.RightFace(ref values.verts, x, y, z);
+                                    }
                                     Voxel_Tris.GenerateTris(ref values.tris, offset);
                                     Voxel_UVs.GetUVs(ref values.UVs, 0, 0, 1);
                                 }
@@ -370,7 +370,14 @@ namespace BloodyFish.UnityVoxelEngine
                         if (chunkValues.blocks[rightIndex] == 0)
                         {
                             int offset = values.verts.Length;
-                            Voxel_Verts_Water.RightFace(ref values.verts, x, y, z);
+                            if(chunkValues.blocks[Block.GetFlatIndex(x+1, y+1, z)] == -1)
+                            {
+                                Voxel_Verts.RightFace(ref values.verts, x, y, z);
+                            }
+                            else
+                            {
+                                Voxel_Verts_Water.RightFace(ref values.verts, x, y, z);
+                            }
                             Voxel_Tris.GenerateTris(ref values.tris, offset);
                             Voxel_UVs.GetUVs(ref values.UVs, 0, 0, 1);
                         }
@@ -386,7 +393,14 @@ namespace BloodyFish.UnityVoxelEngine
                                 if (adjacentChunk.blocks[j] == 0)
                                 {
                                     int offset = values.verts.Length;
-                                    Voxel_Verts_Water.LeftFace(ref values.verts, x, y, z);
+                                    if(adjacentChunk.blocks[Block.GetFlatIndex(ChunkValues.WIDTH - 1, y + 1, z)] == -1)
+                                    {
+                                        Voxel_Verts.LeftFace(ref values.verts, x, y, z);
+                                    }
+                                    else
+                                    {
+                                        Voxel_Verts_Water.LeftFace(ref values.verts, x, y, z);
+                                    }
                                     Voxel_Tris.GenerateTris(ref values.tris, offset);
                                     Voxel_UVs.GetUVs(ref values.UVs, 0, 0, 1);
                                 }
@@ -401,7 +415,14 @@ namespace BloodyFish.UnityVoxelEngine
                         if (chunkValues.blocks[leftIndex] == 0)
                         {
                             int offset = values.verts.Length;
-                            Voxel_Verts_Water.LeftFace(ref values.verts, x, y, z);
+                            if(chunkValues.blocks[Block.GetFlatIndex(x-1, y+1, z)] == -1)
+                            {
+                                Voxel_Verts.LeftFace(ref values.verts, x, y, z);
+                            }
+                            else
+                            {
+                                Voxel_Verts_Water.LeftFace(ref values.verts, x, y, z);
+                            }
                             Voxel_Tris.GenerateTris(ref values.tris, offset);
                             Voxel_UVs.GetUVs(ref values.UVs, 0, 0, 1);
                         }
@@ -418,7 +439,14 @@ namespace BloodyFish.UnityVoxelEngine
                                 if (adjacentChunk.blocks[j] == 0)
                                 {
                                     int offset = values.verts.Length;
-                                    Voxel_Verts_Water.FrontFace(ref values.verts, x, y, z);
+                                    if(adjacentChunk.blocks[Block.GetFlatIndex(x, y + 1, 0)] == -1)
+                                    {
+                                        Voxel_Verts.FrontFace(ref values.verts, x, y, z);
+                                    }
+                                    else
+                                    {
+                                        Voxel_Verts_Water.FrontFace(ref values.verts, x, y, z);
+                                    }
                                     Voxel_Tris.GenerateTris(ref values.tris, offset);
                                     Voxel_UVs.GetUVs(ref values.UVs, 0, 0, 1);
                                 }
@@ -434,7 +462,15 @@ namespace BloodyFish.UnityVoxelEngine
                         if (chunkValues.blocks[frontIndex] == 0)
                         {
                             int offset = values.verts.Length;
-                            Voxel_Verts_Water.FrontFace(ref values.verts, x, y, z);
+                            if(chunkValues.blocks[Block.GetFlatIndex(x, y+1, z+1)] == -1)
+                            {
+                                Voxel_Verts.FrontFace(ref values.verts, x, y, z);
+                            }
+                            else
+                            {
+                                Voxel_Verts_Water.FrontFace(ref values.verts, x, y, z);
+                            }
+
                             Voxel_Tris.GenerateTris(ref values.tris, offset);
                             Voxel_UVs.GetUVs(ref values.UVs, 0, 0, 1);
                         }
@@ -450,7 +486,15 @@ namespace BloodyFish.UnityVoxelEngine
                                 if (adjacentChunk.blocks[j] == 0)
                                 {
                                     int offset = values.verts.Length;
-                                    Voxel_Verts_Water.BackFace(ref values.verts, x, y, z);
+                                    if(adjacentChunk.blocks[Block.GetFlatIndex(x, y + 1, ChunkValues.LENGTH - 1)] == -1)
+                                    {
+                                        Voxel_Verts.BackFace(ref values.verts, x, y, z);
+                                    }
+                                    else
+                                    {
+                                        Voxel_Verts_Water.BackFace(ref values.verts, x, y, z);
+
+                                    }
                                     Voxel_Tris.GenerateTris(ref values.tris, offset);
                                     Voxel_UVs.GetUVs(ref values.UVs, 0, 0, 1);
                                 }

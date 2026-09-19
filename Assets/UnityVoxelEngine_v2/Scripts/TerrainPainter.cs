@@ -64,7 +64,7 @@ namespace BloodyFish.UnityVoxelEngine
 
                     else if (blockPos.y > (WorldGenConstants.WATER_LEVEL + WorldGenConstants.BEACH_HEIGHT) - random.NextInt(1, 3))
                     {
-                        if(Block.GetNeighboringBlocks(chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary).Contains((sbyte)-1))
+                        if(Block.NeighboringBlockContains(Block.GetNeighboringBlocks(chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary), -1))
                         {
                             Chunk.SetBlock(biomeParam.beachBlockID, chunkPos, blockPos, blocks, bufferDictionary, chunkDictionary); 
                         }

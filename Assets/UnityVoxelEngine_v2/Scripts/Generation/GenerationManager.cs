@@ -187,8 +187,8 @@ namespace BloodyFish.UnityVoxelEngine
             {
                 chunkDictionary.TryGetValue(chunkPos, out ChunkValues chunk);
                 
-                Chunk.TerminateTerrainGeneration(chunkPos, chunk);
-                Chunk.TerminateMeshValueGeneration(chunk);
+                if(chunk.treeGenJobHandle.IsCompleted)Chunk.TerminateTerrainGeneration(chunkPos, chunk);
+                if(chunk.meshGenJobHandle.IsCompleted)Chunk.TerminateMeshValueGeneration(chunk);
                 
                 Vector2Int chunkPosVector2 = new Vector2Int(chunkPos.x * ChunkValues.WIDTH, chunkPos.y * ChunkValues.LENGTH);
                 if (!Chunk.CalculateIfInRenderDistance(chunkPos, new float2(player.position.x, player.position.z), blockRenderDistance))

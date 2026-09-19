@@ -91,6 +91,16 @@ namespace BloodyFish.UnityVoxelEngine
         }
 
         [BurstCompile]
+        public static bool NeighboringBlockContains(NativeArray<sbyte> neighbors, sbyte blockID)
+        {
+            for (int i = 0; i < neighbors.Length; i++)
+            {
+                if (neighbors[i] == blockID) return true;
+            }
+            return false;
+        }
+
+        [BurstCompile]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool CheckTransparentBlockPlacement(BlockData currentBlock, BlockData adjacentBlock)
         {

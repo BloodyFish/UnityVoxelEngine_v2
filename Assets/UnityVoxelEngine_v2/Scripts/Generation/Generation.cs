@@ -26,7 +26,7 @@ namespace BloodyFish.UnityVoxelEngine
         }
 
         [BurstCompile]
-        public static JobHandle GenTerrain(int2 worldSpaceChunkPos, NativeArray<sbyte> blocks, ref Unity.Mathematics.Random random, out GenerateChunkValuesJob generationJob)
+        public static JobHandle GenTerrain(int2 worldSpaceChunkPos, NativeArray<sbyte> blocks, out GenerateChunkValuesJob generationJob)
         {
             generationJob = new GenerateChunkValuesJob()
             {
@@ -83,7 +83,7 @@ namespace BloodyFish.UnityVoxelEngine
             for(int index = startIndex; index < startIndex + count; index++)
             {
                 int x = index % ChunkValues.WIDTH;
-                int z = index / ChunkValues.LENGTH;
+                int z = index / ChunkValues.WIDTH;
 
                 // Only calculate the 2D noise every other index
                 // This is a performance optimization
